@@ -1,0 +1,33 @@
+dev_directory: ../dev_data
+eval_directory: ../eval_data
+model_directory: ./model
+result_directory: ./result
+result_file: result.csv
+
+max_fpr: 0.1
+decision_threshold: 0.9
+ext: wav
+
+feature:
+  n_mels: 128
+  n_frames: 5
+  n_hop_frames: 1
+  n_fft: 1024
+  hop_length: 512
+  power: 2.0
+
+model:
+  hidden_dim: 128
+  latent_dim: 8
+  n_hidden: 3
+
+training:
+  learning_rate: 0.001
+  epochs : 100
+  batch_size : 512
+  shuffle : True
+  validation_split : 0.1
+  weight_decay: 0.0
+  lr_step_size: 50
+  lr_gamma: 0.5
+  verbose : 1
