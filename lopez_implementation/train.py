@@ -1,281 +1,172 @@
-"""
-PyTorch script for model training (Autoencoder).
-
-Copyright (C) 2021 by Akira TAMAMORI
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-"""
-
-# Standard library imports.
 import os
-import sys
-
-# Related third party imports.
-import numpy
-import scipy.stats
+import yaml
+import argparse
 import torch
-import torch.utils.data
-from torch import optim
-from torchinfo import summary
-
-import joblib
-from tqdm import tqdm
-
-# Local application/library specific imports.
 import util
-# from models import AutoEncoder
-from models import Lopez2020
 from data_utils import *
-
-# Load configuration from YAML file.
-config = util.load_yaml("./config.yaml")
-
-# String constant: "cuda:0" or "cpu"
-DEVICE = util.get_device()
-
-def get_model():
-    """
-    Instantiate AutoEncoder.
-    """
-    # model = AutoEncoder(
-    #     x_dim=config["feature"]["n_mels"] * config["feature"]["n_frames"],
-    #     h_dim=config["model"]["hidden_dim"],
-    #     z_dim=config["model"]["latent_dim"],
-    #     n_hidden=config["model"]["n_hidden"],
-    # )
-
-    model = Lopez2020(num_sections=3,
-                      n_frames=config["feature"]["n_frames"],
-                      n_mels=config["feature"]["n_mels"])
-    return model
+from models import *
+import joblib
 
 
-def get_optimizer(model):
-    """
-    Instantiate optimizer.
-    """
+parser = argparse.ArgumentParser()
+parser.add_argument('-m', '--machine_type', nargs='*', type=str,
+                     help='Choose 0 or more values from [ToyCar, ToyTrain, fan, gearbox, pump, slider, valve]')
+args = parser.parse_args()
 
-    optimizer = optim.Adam(
-        params=model.parameters(),
-        weight_decay=config["training"]["weight_decay"],
-        lr=config["training"]["learning_rate"],
-    )
-
-    # optional
-    scheduler = optim.lr_scheduler.StepLR(
-        optimizer,
-        step_size=config["training"]["lr_step_size"],
-        gamma=config["training"]["lr_gamma"],
-    )
-
-    return optimizer, scheduler
-
-
-def iterloop(config, epoch, model, data_loader, mode, optimizer=None, scheduler=None):
-    if mode == 'train':
-        model.train()
-    else:
-        model.eval()
-    
-    losses = []
-    with tqdm(data_loader) as pbar:
-        # for data in pbar:
-        #     data = data.to(DEVICE).float()
-        #     if optimizer is not None:
-        #         optimizer.zero_grad()
-        #     loss = model.get_loss(data)
-        for data, label in pbar:
-            data = data.to(DEVICE).float()
-            label = label.to(DEVICE).float()
-            if optimizer is not None:
-                optimizer.zero_grad()
-            loss = model.get_loss(data, label)
-
-            if mode == 'train':
-                loss.backward()
-                optimizer.step()
-            losses.append(loss.item())
-
-            pbar.set_postfix({'mode': mode, 'epoch': epoch, 'loss': np.mean(losses)})
-
-        if scheduler is not None:
-            scheduler.step()
-    return np.mean(losses)
-
-
-def calc_anomaly_score(model, data_loader):
-    """
-    - Calculate anomaly scores over all feature vectors
-    - Fit gamma distribution for anomaly scores
-    - Returns parameters of gamma distribution
-    """
-    anomaly_score = []
-    model.eval()  # validation mode
-    with torch.no_grad():
-        for data, label in data_loader:
-            data = data.to(DEVICE).float()  # send data to GPU
-            label = label.to(DEVICE).float()  # workaround
-            loss = model.get_loss(data, label).cpu().numpy()
-            anomaly_score.append(loss)
-
-    anomaly_score = numpy.array(anomaly_score, dtype=float)
-    gamma_params = scipy.stats.gamma.fit(anomaly_score)
-    gamma_params = list(gamma_params)
-
-    return gamma_params
-
-
-def fit_gamma_dist(dataset, model, target_dir):
-    """
-    - Fit gamma distribution for anomaly scores.
-    - Save the parameters of the distribution.
-    """
-
-    data_loader = torch.utils.data.DataLoader(
-        dataset,
-        batch_size=config["training"]["batch_size"],
-        shuffle=False,
-        drop_last=False,
-    )
-    # fit gamma distribution for anomaly scores
-    gamma_params = calc_anomaly_score(model=model, data_loader=data_loader)
-    score_file_path = "{model}/score_distr_{machine_type}.pkl".format(
-        model=config["model_directory"], machine_type=os.path.split(target_dir)[1]
-    )
-    # save the parameters of the distribution
-    joblib.dump(gamma_params, score_file_path)
-
-
-def save_model(model, model_dir, machine_type):
-    """
-    Save PyTorch model.
-    """
-
-    model_file_path = "{model}/model_{machine_type}.hdf5".format(
-        model=model_dir, machine_type=machine_type
-    )
-    # if os.path.exists(model_file_path):
-    #     print("Model already exists!")
-    #     continue
-    torch.save(model.state_dict(), model_file_path)
-    print("save_model -> %s" % (model_file_path))
+DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 
 def main(config):
-    """
-    Perform model training and validation.
-    """
+    """Perform model training and validation"""
+    
+    # make directory to save train logs
+    os.makedirs(config['train_log_dir'], exist_ok=True)
+    os.makedirs(config['model_save_dir'], exist_ok=True)
 
-    # check mode
-    # "development": mode == True
-    # "evaluation": mode == False
-    mode = util.command_line_chk()  # constant: True or False
-    if mode is None:
-        sys.exit(-1)
+    # load base directory list
+    dir_list = select_dirs(config=config, mode='dev')
+    if args.machine_type is not None:
+        dir_list = [d for d in dir_list if os.path.basename(d) in args.machine_type]
 
-    # make output directory
-    os.makedirs(config["model_directory"], exist_ok=True)
-
-    # load base_directory list
-    dir_list = util.select_dirs(config=config, mode=mode)
     for idx, target_dir in enumerate(dir_list):
-        csv_logdir = os.path.join(config["model_directory"], f'{os.path.basename(target_dir)}_csv_log.csv')
-        if os.path.exists(csv_logdir):
-            os.remove(csv_logdir)
+        print("====================================================================")
+        print("[%d/%d] %s" % (idx + 1, len(dir_list), target_dir))
+
+        machine_type = os.path.basename(target_dir)
+        csv_logdir = os.path.join(config['train_log_dir'], f'{machine_type}_train_log.csv')
+
+        section_names_file_path = os.path.join(config['model_save_dir'], f'section_names_{machine_type}.pkl')
+        unique_section_names = np.unique(get_section_names(target_dir, dir_name="train"))
+        joblib.dump(unique_section_names, section_names_file_path)
 
         with open(csv_logdir, 'a') as f:
             f.write('config\n')
             for k, v in config.items():
                 f.write(k + ',' + str(v) + '\n')
-            f.write('epoch,train_loss,val_loss\n')
-        print("===============================================")
-        print("[%d/%d] %s" % (idx + 1, len(dir_list), target_dir))
+            f.write('epoch,train_loss,val_loss,val_acc\n')
 
-        print("\n============== DATASET_GENERATOR ==============")
-        # generate file list under "target_dir" directory.
-        files, _ = util.file_list_generator(
-            target_dir=target_dir,
-            section_name="*",
-            dir_name="train",
-            mode=mode,
-        )
+        print("============= DATASET GENERATOR ==============")
+        files, labels = file_list_generator(target_dir=target_dir,
+                                            section_name='*',
+                                            dir_name='train',
+                                            mode='dev')
 
-        dcase_dataset = DcaseDataset(files, config=config, transform=None)  # generate dataset from file list.
-        print("===============================================")
+        dcase_dataset = DcaseDataset(files,
+                                     labels,
+                                     config=config,
+                                     machine_config=config[machine_type],
+                                     transform=None)
 
-        print("\n=========== DATALOADER_GENERATOR ==============")
-        data_loader = {"train": None, "val": None}
-        data_loader["train"], data_loader["val"] = get_dataloader(dcase_dataset, config=config)
-        print("===============================================")
+        print("============ DATALOADER GENERATOR ============")
+        data_loader = {'train': None, 'val': None}
+        data_loader['train'], data_loader['val'] = get_dataloader(dcase_dataset,
+                                                                  config=config,
+                                                                  machine_type=machine_type)
 
-        print("\n================ MODEL TRAINING ===============")
-        model = get_model().to(DEVICE)
-        optimizer, _ = get_optimizer(model)
-        # optimizer, scheduler = get_optimizer(model)  # optional
+        print("================ BUILD MODEL =================")
+        model = Lopez2021().to(DEVICE)
 
-        # display summary of model through torchinfo
-        summary(
-            model,
-            input_size=(
-                config["training"]["batch_size"],
-                # config["feature"]["n_mels"] * config["feature"]["n_frames"],
-                1,
-                config["feature"]["n_frames"],
-                config["feature"]["n_mels"],
-            ),
-        )
+        criterion = torch.nn.CrossEntropyLoss()
 
-        # training loop
-        for epoch in range(1, config["training"]["epochs"] + 1):
-            print("Epoch {:2d}: ".format(epoch), end="")
-            train_loss = iterloop(
-                config=config,
-                epoch=epoch,
-                model=model,
-                data_loader=data_loader["train"],
-                mode='train',
-                optimizer=optimizer,
-                # scheduler=scheduler  # optional
-            )
+        optimizer = torch.optim.Adam(params=model.parameters(),
+                                     weight_decay=config['training']['weight_decay'],
+                                     lr=config['training']['learning_rate'])
+        
+        scheduler = None
+        # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,
+        #                                                        T_max=1.5,
+        #                                                        eta_min=0,
+        #                                                        last_epoch=-1,
+        #                                                        verbose=False)
+
+        visualizer = util.Visualizer()
+        plot_logdir = os.path.join(config['train_log_dir'], f'{machine_type}_train.png')
+
+        print("================= TRAINING ===================")
+        train_losses = []  # train loss for all epochs
+        val_losses = []    # validation loss for all epochs
+        val_accs = []      # section id classification accuracy for all epochs
+
+        for epoch in range(1, 1+config['training']['epochs']):
+            # ========== train ==========
+            model.train()
+            train_loss = []
+            with tqdm(data_loader['train']) as pbar:
+                for x, s, y in pbar:  # data, section id, anomaly
+                    x = x.to(DEVICE).float()
+                    s = s.to(DEVICE).long()
+                    y = y.to(DEVICE).long()
+
+                    optimizer.zero_grad()
+                    
+                    # train_loss_step = model.get_loss(x, y)
+                    out = model(x)
+                    train_loss_step = criterion(out, s)
+                    train_loss_step.backward()
+                    optimizer.step()
+
+                    train_loss.append(train_loss_step.item())
+                
+                if scheduler is not None:
+                    scheduler.step()
+                
+                pbar.set_postfix({'epoch': epoch, 'train_loss': np.mean(train_loss)})
+
+            train_loss = np.mean(train_loss)
+            train_losses.append(train_loss)
+
+            # ======== validation ======== 
+            model.eval()
+            val_loss = []
+            correct = 0
+            total = 0
+            anomaly_scores = []
             with torch.no_grad():
-                val_loss = iterloop(config=config, epoch=epoch, model=model, data_loader=data_loader["val"], mode='val')
+                with tqdm(data_loader['val']) as pbar:
+                    for x, s, y in pbar:  # data, section id, anomaly
+                        x = x.to(DEVICE).float()
+                        s = s.to(DEVICE).long()
+                        y = y.to(DEVICE).long()
+
+                        # val_loss_step = model.get_loss(x, y)
+                        out = model(x)
+                        _, s_pred = torch.max(out, 1) 
+                        val_loss_step = criterion(out, s)
+
+                        val_loss.append(val_loss_step.item())
+                        correct += (s == s_pred).sum().item()
+                        total += s.size(0)
+                        val_acc = 100 * (correct / total)
+
+                        score = util.calc_anomaly_score(out, int(s[0]))
+                        anomaly_scores.append(score)
+
+                    pbar.set_postfix({'epoch': epoch, 'val_loss': np.mean(val_loss), 'val_acc': val_acc})
+
+                val_loss = np.mean(val_loss)
+                val_losses.append(val_loss)
+                val_accs.append(val_acc)
+
+            gamma_params = util.fit_gamma_dist(anomaly_scores, machine_type, epoch, config)
+            # decision_threshold = util.calc_decision_threshold(machine_type, epoch, config)
+            
+            print(f'[Epoch {epoch:3d}] train_loss: {train_loss:.4f}, val_loss: {val_loss:.4f}, val_acc:{val_acc:.2f}%\n')
 
             with open(csv_logdir, 'a') as f:
-                f.write(f'{epoch},{train_loss},{val_loss}\n')
-                
+                f.write(f'{epoch},{train_loss},{val_loss},{val_acc}\n')
 
-        del data_loader  # delete the dataset for training.
+            visualizer.loss_plot(train_losses, val_losses)
+            visualizer.save_figure(plot_logdir)
 
-        # fit gamma distribution for anomaly scores
-        # and save the parameters of the distribution
-        fit_gamma_dist(dcase_dataset, model, target_dir)
+        del dcase_dataset, data_loader
 
-        print("============== SAVE MODEL ==============")
-        save_model(
-            model,
-            model_dir=config["model_directory"],
-            machine_type=os.path.split(target_dir)[1],
-        )
-
-        print("============== END TRAINING ==============")
+        print("================ SAVE MODEL ================")
+        util.save_model(model, model_save_dir=config['model_save_dir'], machine_type=machine_type)
+        print("====================================================================")
 
 
 if __name__ == "__main__":
+    with open('./config.yaml') as f:
+        config = yaml.safe_load(f)
+    
     main(config)

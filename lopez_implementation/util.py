@@ -1,249 +1,160 @@
-"""
-Python script for definition of utility functions.
-
-Copyright (C) 2021 by Akira TAMAMORI
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-"""
-
-import argparse
-import csv
-import glob
-import itertools
 import os
-import re
-
-import torch
+import sys
+import glob
 import numpy as np
-import yaml
+import joblib
+import scipy
+from scipy.special import softmax
+from sklearn import metrics
+import torch
 
-__VERSIONS__ = "1.0.0"
 
-
-def command_line_chk():
-    """
-    Parse command line arguments.
-    """
-    parser = argparse.ArgumentParser(
-        description="Without option argument, it will not run properly."
+def calc_anomaly_score(preds, section_id):
+    preds = softmax(preds.cpu(), axis=1)
+    prob = preds[:, section_id]  # softmax output for the correct section
+    anomaly_score = np.mean(
+        np.log(
+            np.maximum(1.0 - prob, sys.float_info.epsilon)
+            - np.log(np.maximum(prob, sys.float_info.epsilon))
+        ).numpy()
     )
-    parser.add_argument(
-        "-v", "--version", action="store_true", help="show application version"
+    return anomaly_score
+
+
+
+def fit_gamma_dist(anomaly_score, machine_type, epoch, config):
+    gamma_params = scipy.stats.gamma.fit(anomaly_score)
+    gamma_params = list(gamma_params)
+
+    # fit gamma distribution for anomaly scores
+    score_file_path = os.path.join(
+        config['model_save_dir'], f'score_distr_{machine_type}_epoch{epoch}.pkl'
     )
-    parser.add_argument("-d", "--dev", action="store_true", help="run mode Development")
-    parser.add_argument("-e", "--eval", action="store_true", help="run mode Evaluation")
-    args = parser.parse_args()
-    if args.version:
-        print("===============================")
-        print("DCASE 2021 task 2 baseline\nversion {}".format(__VERSIONS__))
-        print("===============================\n")
-    if args.dev:
-        flag = True
-    elif args.eval:
-        flag = False
-    else:
-        flag = None
-        print("incorrect argument")
-        print("please set option argument '--dev' or '--eval'")
-    return flag
+    # save the parameters of the distribution
+    joblib.dump(gamma_params, score_file_path)
+    return gamma_params
 
 
-def load_yaml(yaml_file):
-    """
-    Load yaml file.
-    """
-    with open(yaml_file) as stream:
-        param = yaml.safe_load(stream)
-    return param
+def calc_decision_threshold(score_distr_file_path, config):
+    # load anomaly score distribution for determining threshold
+    shape_hat, loc_hat, scale_hat = joblib.load(score_distr_file_path)
 
-
-def makedir(path):
-    os.makedirs(path, exist_ok=True)
-
-    
-def get_device():
-    return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-
-def select_dirs(config, mode):
-    """
-    Get directory paths according to mode.
-
-    param : dict
-        baseline.yaml data
-
-    return :
-        if active type the development :
-            dirs :  list [ str ]
-                load base directory list of dev_data
-        if active type the evaluation :
-            dirs : list [ str ]
-                load base directory list of eval_data
-    """
-    if mode:
-        print("load_directory <- development")
-        query = os.path.abspath("{base}/*".format(base=config["dev_directory"]))
-    else:
-        print("load_directory <- evaluation")
-        query = os.path.abspath("{base}/*".format(base=config["eval_directory"]))
-    dirs = sorted(glob.glob(query))
-    dirs = [f for f in dirs if os.path.isdir(f)]
-    return dirs
-
-
-# used in 01_test.py
-def get_section_names(target_dir, dir_name, ext="wav"):
-    """
-    Get section name (almost equivalent to machine ID).
-
-    target_dir : str
-        base directory path
-    dir_name : str
-        sub directory name
-    ext : str (default="wav)
-        file extension of audio files
-
-    return :
-        section_names : list [ str ]
-            list of section names extracted from the names of audio files
-    """
-    # create test files
-    query = os.path.abspath(
-        "{target_dir}/{dir_name}/*.{ext}".format(
-            target_dir=target_dir, dir_name=dir_name, ext=ext
-        )
+    # determine threshold for decision
+    decision_threshold = scipy.stats.gamma.ppf(
+        q=config["decision_threshold"], a=shape_hat, loc=loc_hat, scale=scale_hat
     )
-    file_paths = sorted(glob.glob(query))
-    # extract section names
-    section_names = sorted(
-        list(
-            set(
-                itertools.chain.from_iterable(
-                    [re.findall("section_[0-9][0-9]", ext_id) for ext_id in file_paths]
-                )
-            )
-        )
+
+    return decision_threshold
+
+
+def calc_evaluation_scores(y_true, y_pred, decision_threshold, config):
+    try:
+        auc = metrics.roc_auc_score(y_true, y_pred)
+        p_auc = metrics.roc_auc_score(y_true, y_pred, max_fpr=config["max_fpr"])
+    except:
+        auc = 0
+        p_auc = 0
+
+    _, false_positive, false_negative, true_positive = metrics.confusion_matrix(
+        y_true, y_pred
+        # y_true, [1 if x > decision_threshold else 0 for x in y_pred]
+    ).ravel()
+
+    prec = true_positive / np.maximum(
+        true_positive + false_positive, sys.float_info.epsilon
     )
-    return section_names
+    recall = true_positive / np.maximum(
+        true_positive + false_negative, sys.float_info.epsilon
+    )
+    f1_score = 2.0 * prec * recall / np.maximum(prec + recall, sys.float_info.epsilon)
+
+    print("AUC : {:.6f}".format(auc))
+    print("pAUC : {:.6f}".format(p_auc))
+    print("precision : {:.6f}".format(prec))
+    print("recall : {:.6f}".format(recall))
+    print("F1 score : {:.6f}".format(f1_score))
+
+    return auc, p_auc, prec, recall, f1_score
 
 
-def file_list_generator(
-    target_dir,
-    section_name,
-    dir_name,
-    mode,
-    ext="wav",
-):
-    """
-    Get list of audio file paths
+def save_model(model, model_save_dir, machine_type):
+    model_file_path = f'{model_save_dir}/model_{machine_type}.pt'
 
-    target_dir : str
-        base directory path
-    section_name : str
-        section name of audio file in <<dir_name>> directory
-    dir_name : str
-        sub directory name
-    prefix_normal : str (default="normal")
-        normal directory name
-    prefix_anomaly : str (default="anomaly")
-        anomaly directory name
-    ext : str (default="wav")
-        file extension of audio files
-
-    return :
-        if the mode is "development":
-            files : list [ str ]
-                audio file list
-            labels : list [ boolean ]
-                label info. list
-                * normal/anomaly = 0/1
-        if the mode is "evaluation":
-            files : list [ str ]
-                audio file list
-    """
-    print("target_dir : %s" % (target_dir + "_" + section_name))
-
-    prefix_normal = "normal"
-    prefix_anomaly = "anomaly"
-
-    # development
-    if mode:
-        query = os.path.abspath(
-            # example:
-            # dev_data/ToyCar/train/section_00_source_train_normal_0025_A1Spd28VMic1.wav
-            "{target_dir}/{dir_name}/{section_name}_*_{prefix_normal}_*.{ext}".format(
-                target_dir=target_dir,
-                dir_name=dir_name,
-                section_name=section_name,
-                prefix_normal=prefix_normal,
-                ext=ext,
-            )
-        )
-        normal_files = sorted(glob.glob(query))
-        normal_labels = np.zeros(len(normal_files))
-
-        query = os.path.abspath(
-            "{target_dir}/{dir_name}/{section_name}_*_{prefix_normal}_*.{ext}".format(
-                target_dir=target_dir,
-                dir_name=dir_name,
-                section_name=section_name,
-                prefix_normal=prefix_anomaly,
-                ext=ext,
-            )
-        )
-        anomaly_files = sorted(glob.glob(query))
-        anomaly_labels = np.ones(len(anomaly_files))
-
-        files = np.concatenate((normal_files, anomaly_files), axis=0)
-        labels = np.concatenate((normal_labels, anomaly_labels), axis=0)
-
-        print("number of files : %s" % (str(len(files))))
-        # if files.size == 0:
-        if len(files) == 0:
-            print("no_wav_file!!")
-
-    # evaluation
-    else:
-        query = os.path.abspath(
-            "{target_dir}/{dir_name}/{section_name}_*.{ext}".format(
-                target_dir=target_dir,
-                dir_name=dir_name,
-                section_name=section_name,
-                ext=ext,
-            )
-        )
-        files = sorted(glob.glob(query))
-        labels = None
-        print("number of files : %s" % (str(len(files))))
-        # if files.size == 0:
-        if len(files) == 0:
-            print("no_wav_file!!")
-        # print("\n=========================================")
-
-    return files, labels
+    torch.save(model.state_dict(), model_file_path)
+    print("saved model -> %s" % (model_file_path))
 
 
-def save_csv(save_file_path, save_data):
-    """
-    Save results (AUCs and pAUCs) into csv file.
-    """
-    with open(save_file_path, "w", newline="") as csv_file:
-        writer = csv.writer(csv_file, lineterminator="\n")
-        writer.writerows(save_data)
+def calc_performance_section(performance):
+    """Calculate model performance per section"""
+    csv_lines = []
+    amean_performance = np.mean(np.array(performance, dtype=float), axis=0)
+    csv_lines.append(["arithmetic mean", ""] + list(amean_performance))
+    hmean_performance = scipy.stats.hmean(
+        np.maximum(np.array(performance, dtype=float), sys.float_info.epsilon),
+        axis=0,
+    )
+    csv_lines.append(["harmonic mean", ""] + list(hmean_performance))
+    csv_lines.append([])
+
+    return csv_lines
+
+
+def calc_performance_all(performance):
+    """Calculate model performance over all sections"""
+    csv_lines = []
+    csv_lines.append(["", "", "AUC", "pAUC", "precision", "recall", "F1 score"])
+    amean_performance = np.mean(np.array(performance, dtype=float), axis=0)
+    csv_lines.append(
+        ["arithmetic mean over all machine types, sections, and domains", ""]
+        + list(amean_performance)
+    )
+    hmean_performance = scipy.stats.hmean(
+        np.maximum(np.array(performance, dtype=float), sys.float_info.epsilon),
+        axis=0,
+    )
+    csv_lines.append(
+        ["harmonic mean over all machine types, sections, and domains", ""]
+        + list(hmean_performance)
+    )
+    csv_lines.append([])
+
+    return csv_lines
+
+
+class Visualizer(object):
+    def __init__(self):
+        import matplotlib.pyplot as plt
+        self.plt = plt
+        self.fig = self.plt.figure(figsize=(7, 5))
+        self.plt.subplots_adjust(wspace=0.3, hspace=0.3)
+
+    def loss_plot(self, loss, val_loss):
+        """
+        Plot loss curve.
+
+        loss : list [ float ]
+            training loss time series.
+        val_loss : list [ float ]
+            validation loss time series.
+
+        return   : None
+        """
+        ax = self.fig.add_subplot(1, 1, 1)
+        ax.cla()
+        ax.plot(loss)
+        ax.plot(val_loss)
+        ax.set_title("Model loss")
+        ax.set_xlabel("Epoch")
+        ax.set_ylabel("Loss")
+        ax.legend(["Train", "Validation"], loc="upper right")
+
+    def save_figure(self, name):
+        """
+        Save figure.
+
+        name : str
+            save png file path.
+
+        return : None
+        """
+        self.plt.savefig(name)
