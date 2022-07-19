@@ -26,7 +26,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import torch
 from torch import nn
 import torch.nn.functional as F
-import torchaudio
 
 
 class Lopez2020Encoder(nn.Module):
@@ -97,13 +96,6 @@ class Lopez2020(nn.Module):
         out = self.stats_pool(out)
         out = self.fc(out)
         return out
-
-    def get_loss(self, input, label):
-        output = self.forward(input)
-        # import pdb; pdb.set_trace()
-        loss = nn.CrossEntropyLoss()(output, label.long())
-        return loss
-
 
 class XVector(nn.Module):
     """
@@ -186,8 +178,3 @@ class Lopez2021(nn.Module):
         x = x.reshape(x.size(0), 1, -1)
         x = self.xvector(x)
         return x
-
-    def get_loss(self, x, y_true):
-        y_pred = self.forward(x)
-        loss = self.criterion(y_pred, y_true.long())
-        return loss
