@@ -24,7 +24,16 @@
 * test.py => dev_data 사용
 
     * normal/anomaly 분류 정확도 평가
+    * --ep: decision threshold 구할 때 사용할 score distribution의 epoch 설정
+    
+        (model save된 epoch으로 설정하는 것이 일반적)
+    
     * 학습된 모델 load해서 machine type, section id 별 metric 구한 후 csv 생성
     * AUC, pAUC, precision, recall, F1 score
     * 전체 domain, section에 대한 harmonic & arithmetic mean score
     * 전체 machine type, domain, section에 대한 harmonic & arithmetic mean score
+    
+    ```
+    # example
+    python test.py -m ToyCar --ep 40
+    ```
