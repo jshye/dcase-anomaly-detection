@@ -129,8 +129,7 @@ class Visualizer(object):
         self.plt.subplots_adjust(wspace=0.3, hspace=0.3)
 
     def loss_plot(self, loss, val_loss):
-        """
-        Plot loss curve.
+        """Plot loss curve.
 
         loss : list [ float ]
             training loss time series.
@@ -158,3 +157,18 @@ class Visualizer(object):
         return : None
         """
         self.plt.savefig(name)
+
+
+import matplotlib.pyplot as plt
+
+def visualize(loss, val_loss, fname):
+    fig = plt.figure(figsize=(7,5))
+    plt.plot(loss, 'o-', label='train')
+    plt.plot(val_loss, 'x-', label='valid')
+    plt.grid()
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(fname)
+    plt.close()

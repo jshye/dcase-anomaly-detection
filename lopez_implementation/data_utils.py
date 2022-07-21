@@ -232,7 +232,7 @@ class DcaseDataset(torch.utils.data.Dataset):
 
         train_size = int(len(dataset) * (1.0 - self.config['training']['validation_split']))
         val_size = int(len(dataset) * self.config['training']['validation_split'])
-        print(f'train size: {train_size}, val_size: {val_size}')
+        # print(f'train size: {train_size}, val_size: {val_size}')
 
     def __len__(self):
         return self.feat_data.shape[0]  # the number of samples
@@ -249,6 +249,7 @@ class DcaseDataset(torch.utils.data.Dataset):
 def get_dataloader(dataset, config, machine_type):
     """Make dataloader from dataset for training"""
     train_size = int(len(dataset) * (1.0 - config['training']['validation_split']))
+    val_size = int(len(dataset) * config['training']['validation_split'])
     
     data_loader_train = torch.utils.data.DataLoader(
         Subset(dataset, list(range(0, train_size))),
@@ -263,6 +264,8 @@ def get_dataloader(dataset, config, machine_type):
         shuffle=False,
         drop_last=False,
     )
+
+    print(f'train size: {train_size}, val_size: {val_size}')
 
     return data_loader_train, data_loader_val
 
@@ -318,4 +321,7 @@ def get_eval_dataloader(dataset, config, machine_type):
         shuffle=False,
         drop_last=False,
     )
+
+    print(f'test size: {int(len(dataset))}')
+    
     return data_loader_test

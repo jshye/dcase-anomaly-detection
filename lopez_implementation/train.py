@@ -62,7 +62,6 @@ def main(config):
         data_loader['train'], data_loader['val'] = get_dataloader(dcase_dataset,
                                                                   config=config,
                                                                   machine_type=machine_type)
-
         print("================ BUILD MODEL =================")
         model = Lopez2021().to(DEVICE)
 
@@ -72,14 +71,13 @@ def main(config):
                                      weight_decay=config['training']['weight_decay'],
                                      lr=config['training']['learning_rate'])
         
-        scheduler = None
-        # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,
-        #                                                        T_max=1.5,
-        #                                                        eta_min=0,
-        #                                                        last_epoch=-1,
-        #                                                        verbose=False)
+        # scheduler = None
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,
+                                                               T_max=1.5,
+                                                               eta_min=0,
+                                                               last_epoch=-1,
+                                                               verbose=False)
 
-        visualizer = util.Visualizer()
         plot_logdir = os.path.join(config['train_log_dir'], f'{machine_type}_train.png')
 
         print("================= TRAINING ===================")
@@ -91,7 +89,7 @@ def main(config):
             # ========== train ==========
             model.train()
             train_loss = []
-            with tqdm(data_loader['train']) as pbar:
+            with tqdm(data_loader['train'], ncols=100) as pbar:
                 for x, s, y in pbar:  # data, section id, anomaly
                     x = x.to(DEVICE).float()
                     s = s.to(DEVICE).long()
@@ -122,7 +120,7 @@ def main(config):
             total = 0
             anomaly_scores = []
             with torch.no_grad():
-                with tqdm(data_loader['val']) as pbar:
+                with tqdm(data_loader['val'], ncols=100) as pbar:
                     for x, s, y in pbar:  # data, section id, anomaly
                         x = x.to(DEVICE).float()
                         s = s.to(DEVICE).long()
@@ -155,8 +153,10 @@ def main(config):
             with open(csv_logdir, 'a') as f:
                 f.write(f'{epoch},{train_loss},{val_loss},{val_acc}\n')
 
-            visualizer.loss_plot(train_losses, val_losses)
-            visualizer.save_figure(plot_logdir)
+            util.visualize(train_losses, val_losses, plot_logdir)
+
+            ckpt_path = os.path.join(config['model_save_dir'], f'model_{machine_type}_epoch{epoch}.pt')
+            torch.save(model.state_dict(), ckpt_path)
 
         del dcase_dataset, data_loader
 

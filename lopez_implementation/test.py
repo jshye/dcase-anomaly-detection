@@ -87,7 +87,7 @@ def main(config):
                 anomaly_scores = []
                 anomaly_decision = []
                 anomaly_true = []
-                with tqdm(data_loader['test']) as pbar:
+                with tqdm(data_loader['test'], bar_format='{l_bar}{bar:40}{r_bar}{bar:-40b}') as pbar:
                     for x, s, y in pbar:  # data, section id, anomaly
                         x = x.to(DEVICE).float()
                         s = s.to(DEVICE).long()
