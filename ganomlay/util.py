@@ -172,6 +172,7 @@ def visualize(loss, val_loss, fname):
     plt.close()
 
 
+
 def plot_anomaly_score_distrib(normal, abnormal, epoch, decimals=2, show=False):
     normal_scores = np.around(normal, decimals=decimals)
     unique, counts = np.unique(normal_scores, return_counts=True)
