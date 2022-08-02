@@ -99,6 +99,7 @@ def main(config):
         data_loader['train'], data_loader['val'] = get_dataloader(dcase_dataset,
                                                                   config=config,
                                                                   machine_type=machine_type)
+
         print("================ BUILD MODEL =================")
         model = GanomalyModel(
             input_size=(128,313),
@@ -159,11 +160,10 @@ def main(config):
                     optimizer_g.zero_grad()
                     optimizer_d.zero_grad()
                     
-                    ## latent_i: generator latent vector, fake: generated image, latent_o: encoder latent vector
-                    padded, fake, latent_i, latent_o = model(x)  
+                    padded, fake, latent_i, latent_o = model(x)
                     pred_real, _ = model.discriminator(padded)
                     pred_fake, _ = model.discriminator(fake.detach())
-                    loss_g_step = criterion_g(latent_i, latent_o, padded, fake, pred_real, pred_fake)
+                    loss_g_step, error_enc, error_con, error_adv = criterion_g(latent_i, latent_o, padded, fake, pred_real, pred_fake)
                     loss_d_step = criterion_d(pred_real, pred_fake)
 
                     loss_g_step.backward(retain_graph=True)
@@ -177,11 +177,17 @@ def main(config):
                     ####### ***** neptune ***** #######
                     run[f'training/{machine_type}/train/batch/loss_g'].log(loss_g_step.item())
                     run[f'training/{machine_type}/train/batch/loss_d'].log(loss_d_step.item())
+
+                    run[f'training/{machine_type}/train/batch/error_enc'].log(error_enc.item())
+                    run[f'training/{machine_type}/train/batch/error_con'].log(error_con.item())
+                    run[f'training/{machine_type}/train/batch/error_adv'].log(error_adv.item())
                     ####### ***** ******* ***** #######    
 
                 if scheduler is not None:
                     scheduler.step()
                 
+                # pbar.set_postfix({'epoch': epoch, 'train_loss_g': np.mean(train_loss_g)})
+
             train_loss_g = np.mean(train_loss_g)
             train_losses_g.append(train_loss_g)
             train_loss_d = np.mean(train_loss_d)
@@ -215,7 +221,7 @@ def main(config):
                         padded, fake, latent_i, latent_o = model(x)
                         pred_real, _ = model.discriminator(padded)
                         pred_fake, _ = model.discriminator(fake.detach())
-                        loss_g_step = criterion_g(latent_i, latent_o, padded, fake, pred_real, pred_fake)
+                        loss_g_step, error_enc, error_con, error_adv = criterion_g(latent_i, latent_o, padded, fake, pred_real, pred_fake)
                         loss_d_step = criterion_d(pred_real, pred_fake)
 
                         val_loss_g.append(loss_g_step.item())
@@ -224,7 +230,22 @@ def main(config):
                         ####### ***** neptune ***** #######
                         run[f'training/{machine_type}/valid/batch/loss_g'].log(loss_g_step.item())
                         run[f'training/{machine_type}/valid/batch/loss_d'].log(loss_d_step.item())
+
+                        run[f'training/{machine_type}/valid/batch/error_enc'].log(error_enc.item())
+                        run[f'training/{machine_type}/valid/batch/error_con'].log(error_con.item())
+                        run[f'training/{machine_type}/valid/batch/error_adv'].log(error_adv.item())
                         ####### ***** ******* ***** #######
+
+                        # for i in range(len(x)):
+                        #     # score = util.calc_anomaly_score(torch.unsqueeze(out[i], axis=0).detach(), int(s[i].item()))
+                        #     score = torch.mean(torch.pow((latent_i[i] - latent_o[i]), 2), dim=1).view(-1)[:].cpu()
+                        #     import pdb; pdb.set_trace()
+                        #     anomaly_scores.append(score)
+
+                        #     if score > decision_threshold:
+                        #         anomaly_decision.append(1)
+                        #     else:
+                        #         anomaly_decision.append(0)
 
                         # anomaly_scores = torch.mean(torch.pow((latent_i - latent_o), 2), dim=1).view(-1)
                         anomaly_scores = torch.mean(torch.pow((latent_i - latent_o), 2), dim=[1,2,3])
@@ -244,6 +265,8 @@ def main(config):
 
                         anomaly_true.extend(y.cpu())
 
+                    # pbar.set_postfix({'epoch': epoch, 'val_loss': np.mean(val_loss), 'val_acc': val_acc})
+                
                 eval_scores = util.calc_evaluation_scores(y_true=anomaly_true,
                                                           y_pred=anomaly_decision,
                                                           decision_threshold=decision_threshold,
@@ -261,6 +284,7 @@ def main(config):
             ## calculate decision threshold from gamma score_distr_*.pkl
             # decision_threshold = util.calc_decision_threshold(machine_type, epoch, config)
             
+            # print(f'[Epoch {epoch:3d}] train_loss: {train_loss:.4f}, val_loss: {val_loss:.4f}, val_acc:{val_acc:.2f}%\n')
             print(f'[Epoch {epoch:3d}] train_loss_g: {train_loss_g:.4f}, val_loss_g: {val_loss_g:.4f}')
             print(f'            train_loss_d: {train_loss_d:.4f}, val_loss_d: {val_loss_d:.4f}')
 
