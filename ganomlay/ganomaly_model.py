@@ -27,6 +27,7 @@ def pad_nextpow2(batch: Tensor) -> Tensor:
     padded_batch = F.pad(batch, pad=[*padding_h, *padding_w])
     return padded_batch
 
+
 def plot_recons(orig, real, fake, anomaly=False, epoch=None, show=False):
     fig = plt.figure(figsize=(12,4))
 
