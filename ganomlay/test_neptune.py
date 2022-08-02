@@ -7,6 +7,7 @@ from data_utils import *
 from ganomaly_model import *
 import joblib
 import csv
+import matplotlib.pyplot as plt
 
 import neptune.new as neptune
 from getpass import getpass
@@ -62,7 +63,8 @@ def main(config, epoch, decision_threshold=0.7):
             f.write('section,domain,AUC,pAUC,precision,recall,F1_score\n')
         
         print("================ LOAD MODEL =================")
-        model_file = os.path.join(config['model_save_dir'], f'model_{machine_type}.pt')
+        # model_file = os.path.join(config['model_save_dir'], f'model_{machine_type}.pt')
+        model_file = os.path.join(config['model_save_dir'], f'model_{machine_type}_epoch{epoch}.pt')
         section_names_file_path = os.path.join(config['model_save_dir'], f'section_names_{machine_type}.pkl')
         trained_section_names = joblib.load(section_names_file_path)
         # n_sections = trained_section_names.shape[0]
@@ -111,12 +113,15 @@ def main(config, epoch, decision_threshold=0.7):
                 data_loader['test'] = get_eval_dataloader(dcase_dataset, config=config, machine_type=machine_type)
 
                 print("================== RUN TEST ==================")
-                anomaly_scores = []
+                anomaly_scores_all = []
                 anomaly_decision = []
                 anomaly_true = []
 
-                max_score = torch.tensor(float('-inf'), dtype=torch.float32)
-                min_score = torch.tensor(float('inf'), dtype=torch.float32)
+                # max_score = torch.tensor(float('-inf'), dtype=torch.float32)
+                # min_score = torch.tensor(float('inf'), dtype=torch.float32)
+
+                normal_scores = []    # anomaly scores of normal data
+                abnormal_scores = []  # anomaly scores of abnormal data
                 
                 with tqdm(data_loader['test'], bar_format='{l_bar}{bar:40}{r_bar}{bar:-40b}') as pbar:
                     for x, s, y in pbar:  # data, section id, anomaly
@@ -126,20 +131,52 @@ def main(config, epoch, decision_threshold=0.7):
 
                         padded, fake, latent_i, latent_o = model(x)
                         anomaly_scores = torch.mean(torch.pow((latent_i - latent_o), 2), dim=[1,2,3])
-
-                        max_score = max(max_score, torch.max(anomaly_scores))
-                        min_score = min(min_score, torch.min(anomaly_scores))
-                        anomaly_scores = torch.div(
-                            torch.sub(anomaly_scores, min_score), torch.sub(max_score, min_score)
-                        )
-
-                        for score in anomaly_scores:
-                            if score > decision_threshold:
-                                anomaly_decision.append(1)
+                        # anomaly_scores_all.extend(anomaly_scores)
+                        
+                        for i in range(len(y)):
+                            anomaly_scores_all.append(anomaly_scores[i].detach().cpu())
+                            if y[i] == 0:
+                                normal_scores.append(anomaly_scores[i].detach().cpu())
                             else:
-                                anomaly_decision.append(0)
+                                abnormal_scores.append(anomaly_scores[i].detach().cpu())
+
+                        # max_score = max(max_score, torch.max(anomaly_scores))
+                        # min_score = min(min_score, torch.min(anomaly_scores))
 
                         anomaly_true.extend(y.cpu())
+
+                    min_score = np.min(anomaly_scores_all)
+                    max_score = np.max(anomaly_scores_all)
+
+                    if min_score < 0:
+                        max_score -= min_score
+                        min_score = 0
+
+                    # anomaly_scores_all = torch.div(
+                    #     torch.sub(anomaly_scores_all, min_score), torch.sub(max_score, min_score)
+                    # )
+                    # normal_scores = torch.div(
+                    #     torch.sub(torch.as_tensor(normal_scores), min_score), torch.sub(max_score, min_score)
+                    # )
+                    # abnormal_scores = torch.div(
+                    #     torch.sub(torch.as_tensor(abnormal_scores), min_score), torch.sub(max_score, min_score)
+                    # )
+                    anomaly_scores_all = np.divide(
+                        np.subtract(anomaly_scores_all, min_score), np.subtract(max_score, min_score)
+                    )
+                    normal_scores = np.divide(
+                        np.subtract(normal_scores, min_score), np.subtract(max_score, min_score)
+                    )
+                    abnormal_scores = np.divide(
+                        np.subtract(abnormal_scores, min_score), np.subtract(max_score, min_score)
+                    )
+
+                    for score in anomaly_scores_all:
+                        if score > decision_threshold:
+                            anomaly_decision.append(1)
+                        else:
+                            anomaly_decision.append(0)
+
 
                 eval_scores = util.calc_evaluation_scores(y_true=anomaly_true,
                                                           y_pred=anomaly_decision,
@@ -158,7 +195,10 @@ def main(config, epoch, decision_threshold=0.7):
                 run[f'test/{machine_type}/{domain}_domain/section{section}/precision'].log(precision)
                 run[f'test/{machine_type}/{domain}_domain/section{section}/recall'].log(recall)
                 run[f'test/{machine_type}/{domain}_domain/section{section}/F1_score'].log(f1_score)
-                ####### ***** ******* ***** #######
+                
+                fig = util.plot_anomaly_score_distrib(normal_scores, abnormal_scores, epoch, decimals=2, show=False)
+                run[f'test/{machine_type}/{domain}_domain/section{section}/anomaly_score'].log(fig)
+                plt.close()
 
                 performance['section'].append(eval_scores)
                 performance['all'].append(eval_scores)
@@ -183,8 +223,8 @@ def main(config, epoch, decision_threshold=0.7):
 
 if __name__ == "__main__":
     with open('./config.yaml') as f:
-        config = yaml.safe_load(f)
+        config = yaml.safe_load(f)  
     
     max_epoch = args.max_epoch
     for i in range(1, max_epoch+1):
-        main(config, i, decision_threshold=0.7)
+        main(config, i, decision_threshold=0.1)
