@@ -170,3 +170,25 @@ def visualize(loss, val_loss, fname):
     plt.tight_layout()
     plt.savefig(fname)
     plt.close()
+
+
+def plot_anomaly_score_distrib(normal, abnormal, epoch, decimals=2, show=False):
+    normal_scores = np.around(normal, decimals=decimals)
+    unique, counts = np.unique(normal_scores, return_counts=True)
+    normal_scores_cnt = dict(zip(unique, counts))
+
+    abnormal_scores = np.around(abnormal, decimals=decimals)
+    unique, counts = np.unique(abnormal_scores, return_counts=True)
+    abnormal_scores_cnt = dict(zip(unique, counts))
+    
+    fig = plt.figure(figsize=(7,5))
+    plt.bar(*zip(*normal_scores_cnt.items()), label='normal', width=0.05, edgecolor='k', alpha=0.2)
+    plt.bar(*zip(*abnormal_scores_cnt.items()), label='anomaly', width=0.05, edgecolor='k', alpha=0.2)
+    plt.title(f'[{epoch}] Anomaly Score Distribution')
+    plt.legend()
+    plt.tight_layout()
+
+    if show:
+        plt.show()
+    else:
+        return fig
