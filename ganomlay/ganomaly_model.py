@@ -4,6 +4,7 @@ https://github.com/openvinotoolkit/anomalib/tree/development/anomalib/models/gan
 
 import math
 from typing import Tuple, Union
+import matplotlib.pyplot as plt
 
 import torch
 from torch import Tensor, nn
@@ -26,7 +27,92 @@ def pad_nextpow2(batch: Tensor) -> Tensor:
     padded_batch = F.pad(batch, pad=[*padding_h, *padding_w])
     return padded_batch
 
+def plot_recons(orig, real, fake, anomaly=False, epoch=None, show=False):
+    fig = plt.figure(figsize=(12,4))
 
+    # vmin = min(np.min(real.cpu().numpy()[0,0,:,:]), np.min(fake.cpu().detach().numpy()[0,0,:,:]))
+    # vmax = max(np.max(real.cpu().numpy()[0,0,:,:]), np.max(fake.cpu().detach().numpy()[0,0,:,:]))
+
+    plt.subplot(1,3,1)
+    plt.imshow(orig.cpu()[0,0,:,:])
+    plt.colorbar(shrink=0.5)
+    plt.title('source')
+
+    plt.subplot(1,3,2)
+    # plt.imshow(real.cpu()[0,0,:,:], vmin=vmin, vmax=vmax)
+    plt.imshow(real.cpu()[0,0,:,:])
+    plt.colorbar(shrink=0.5)
+    plt.title('real (generator input)')
+
+    plt.subplot(1,3,3)
+    # plt.imshow(fake.cpu()[0,0,:,:])
+    # plt.imshow(fake.cpu().detach().numpy()[0,0,:,:], vmin=vmin, vmax=vmax)
+    plt.imshow(fake.cpu().detach().numpy()[0,0,:,:])
+    plt.colorbar(shrink=0.5)
+    plt.title('fake')
+
+    title = ''
+    if anomaly:
+        title += 'Anomaly'
+    else:
+        title += 'Normal'
+
+    if epoch:
+        title += f' - epoch {epoch}'
+
+    plt.suptitle(title)
+    plt.tight_layout()
+    
+    if show:
+        plt.show()
+    else:
+        return fig
+
+
+def plot_latent(latent_i, latent_o, anomaly=False, epoch=None, show=False):
+    fig = plt.figure(figsize=(12,28))
+    # vmin_i = np.min(latent_i.cpu().detach().numpy())
+    # vmax_i = np.max(latent_i.cpu().detach().numpy())
+    # vmin_o = np.min(latent_o.cpu().detach().numpy())
+    # vmax_o = np.max(latent_o.cpu().detach().numpy())
+
+    anomaly_score = torch.mean(torch.pow((latent_i - latent_o), 2), dim=[1,2,3])
+
+    for i in range(100):
+        pos = 2*i + 1
+        plt.subplot(20,10,pos)
+        plt.imshow(latent_i.cpu().detach().numpy()[0,i,:,:])
+        plt.title(f'i - {i}')
+        plt.axis('off')
+
+    for i in range(100):
+        pos = 2*i + 2
+        plt.subplot(20,10,pos)
+        plt.imshow(latent_o.cpu().detach().numpy()[0,i,:,:])
+        plt.title(f'o - {i}')
+        plt.axis('off')
+
+    # plt.colorbar(shrink=0.5)
+    # plt.suptitle(f'Normal-latent_i (vmin: {vmin_i:.4f}, vmax: {vmax_i:.4f})')
+    title = ''
+    if anomaly:
+        title += 'Anomaly'
+    else:
+        title += 'Normal'
+
+    title += f' {anomaly_score.item():.4f}'
+
+    if epoch:
+        title += f' - epoch {epoch}'
+
+    plt.suptitle(title, fontsize='x-large', y=1.02)
+    plt.tight_layout()
+    
+    if show:
+        plt.show()
+    else:
+        return fig
+        
 ################ Torch models defining encoder, decoder, Generator and Discriminator. #############
 
 class Encoder(nn.Module):
@@ -317,6 +403,8 @@ class GanomalyModel(nn.Module):
         self.weights_init(self.generator)
         self.weights_init(self.discriminator)
 
+        self.tanh = nn.Tanh()  ## normalize input [-1, 1]  --> different from original source
+
     @staticmethod
     def weights_init(module: nn.Module):
         """Initialize DCGAN weights.
@@ -337,6 +425,7 @@ class GanomalyModel(nn.Module):
         Returns:
             Tensor: Regeneration scores.
         """
+        batch = self.tanh(batch)  ## normalize input [-1, 1]  --> different from original source
         padded_batch = pad_nextpow2(batch)
         fake, latent_i, latent_o = self.generator(padded_batch)
         # if self.training:
