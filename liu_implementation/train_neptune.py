@@ -163,18 +163,6 @@ def main(config):
             val_loss = []
             correct = 0
             total = 0
-            anomaly_scores = []
-            anomaly_decision = []
-            anomaly_true = []
-
-            if epoch > 1:
-                ## calculate decision threshold from gamma score_distr_*.pkl
-                score_file_path = os.path.join(
-                    config['model_save_dir'], f'score_distr_{machine_type}_epoch{epoch-1}.pkl'
-                )
-                decision_threshold = util.calc_decision_threshold(score_file_path, config)
-            else:
-                decision_threshold = 0.5
 
             with torch.no_grad():
                 with tqdm(data_loader['val'], ncols=100, leave=False, desc=f'Epoch {epoch:3d}') as pbar:
@@ -197,38 +185,13 @@ def main(config):
                         run[f'training/{machine_type}/valid/batch/loss'].log(val_loss_step.item())
                         ####### ***** ******* ***** #######
 
-                        # score = util.calc_anomaly_score(out, int(s[0]))
-                        # anomaly_scores.append(score)
-                        for i in range(len(out)):
-                            score = util.calc_anomaly_score(torch.unsqueeze(out[i], axis=0).detach(), int(s[i].item()))
-                            anomaly_scores.append(score)
-
-                            if score > decision_threshold:
-                                anomaly_decision.append(1)
-                            else:
-                                anomaly_decision.append(0)
-
-                        anomaly_true.extend(y.cpu())
-
                     pbar.set_postfix({'epoch': epoch, 'val_loss': np.mean(val_loss), 'val_acc': val_acc})
-                
-                eval_scores = util.calc_evaluation_scores(y_true=anomaly_true,
-                                                          y_pred=anomaly_decision,
-                                                          decision_threshold=decision_threshold,
-                                                          config=config)
-                auc, p_auc, precision, recall, f1_score = eval_scores
 
                 val_loss = np.mean(val_loss)
                 val_losses.append(val_loss)
                 val_accs.append(val_acc)
 
-            ## fit gamma distribution and save to score_distr_{machine_type}_epoch{epoch}.pkl
-            gamma_params = util.fit_gamma_dist(anomaly_scores, machine_type, epoch, config)
-            
-            ## calculate decision threshold from gamma score_distr_*.pkl
-            # decision_threshold = util.calc_decision_threshold(machine_type, epoch, config)
-            
-            print(f'[Epoch {epoch:3d}] train_loss: {train_loss:.4f}, val_loss: {val_loss:.4f}, val_acc:{val_acc:.2f}%\n')
+            print(f'[Epoch {epoch:3d}] train_loss: {train_loss:.4f}, val_loss: {val_loss:.4f}, val_acc:{val_acc:.2f}%')
 
             with open(csv_logdir, 'a') as f:
                 f.write(f'{epoch},{train_loss},{val_loss},{val_acc}\n')
@@ -237,12 +200,6 @@ def main(config):
             run[f'training/{machine_type}/train/epoch/loss'].log(train_loss)
             run[f'training/{machine_type}/valid/epoch/loss'].log(val_loss)
             run[f'training/{machine_type}/valid/epoch/accuracy'].log(val_acc)
-            run[f'training/{machine_type}/valid/epoch/AUC'].log(auc)
-            run[f'training/{machine_type}/valid/epoch/pAUC'].log(p_auc)
-            run[f'training/{machine_type}/valid/epoch/precision'].log(precision)
-            run[f'training/{machine_type}/valid/epoch/recall'].log(recall)
-            run[f'training/{machine_type}/valid/epoch/F1_score'].log(f1_score)
-            run[f'training/{machine_type}/valid/epoch/decision_threshold'].log(decision_threshold)
             ####### ***** ******* ***** #######    
             
             util.visualize(train_losses, val_losses, plot_logdir)
