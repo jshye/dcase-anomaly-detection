@@ -4,11 +4,12 @@ https://github.com/openvinotoolkit/anomalib/tree/development/anomalib/models/gan
 
 import math
 from typing import Tuple, Union
-import matplotlib.pyplot as plt
 
 import torch
 from torch import Tensor, nn
 import torch.nn.functional as F
+
+import matplotlib.pyplot as plt
 
 
 def pad_nextpow2(batch: Tensor) -> Tensor:
@@ -34,23 +35,31 @@ def plot_recons(orig, real, fake, anomaly=False, epoch=None, show=False):
     # vmin = min(np.min(real.cpu().numpy()[0,0,:,:]), np.min(fake.cpu().detach().numpy()[0,0,:,:]))
     # vmax = max(np.max(real.cpu().numpy()[0,0,:,:]), np.max(fake.cpu().detach().numpy()[0,0,:,:]))
 
-    plt.subplot(1,3,1)
-    plt.imshow(orig.cpu()[0,0,:,:])
+    plt.subplot(1,4,1)
+    plt.imshow(orig.cpu()[0,:,:])
+    # plt.imshow(orig.cpu()[0,0,:,:])
     plt.colorbar(shrink=0.5)
     plt.title('source')
 
-    plt.subplot(1,3,2)
+    plt.subplot(1,4,2)
     # plt.imshow(real.cpu()[0,0,:,:], vmin=vmin, vmax=vmax)
-    plt.imshow(real.cpu()[0,0,:,:])
+    # plt.imshow(real.cpu()[0,0,:,:])
+    plt.imshow(real.cpu()[0,:,:])
     plt.colorbar(shrink=0.5)
     plt.title('real (generator input)')
 
-    plt.subplot(1,3,3)
+    plt.subplot(1,4,3)
     # plt.imshow(fake.cpu()[0,0,:,:])
     # plt.imshow(fake.cpu().detach().numpy()[0,0,:,:], vmin=vmin, vmax=vmax)
-    plt.imshow(fake.cpu().detach().numpy()[0,0,:,:])
+    # plt.imshow(fake.cpu().detach().numpy()[0,0,:,:])
+    plt.imshow(fake.cpu().detach().numpy()[0,:,:])
     plt.colorbar(shrink=0.5)
     plt.title('fake')
+
+    plt.subplot(1,4,4)
+    plt.imshow(real.cpu()[0,:,:] - fake.cpu().detach().numpy()[0,:,:], cmap=plt.get_cmap('RdGy'))
+    plt.colorbar(shrink=0.5)
+    plt.title('error')
 
     title = ''
     if anomaly:
@@ -113,7 +122,7 @@ def plot_latent(latent_i, latent_o, anomaly=False, epoch=None, show=False):
         plt.show()
     else:
         return fig
-        
+
 ################ Torch models defining encoder, decoder, Generator and Discriminator. #############
 
 class Encoder(nn.Module):
@@ -427,6 +436,12 @@ class GanomalyModel(nn.Module):
             Tensor: Regeneration scores.
         """
         batch = self.tanh(batch)  ## normalize input [-1, 1]  --> different from original source
+
+        # ## normalize input [-1, 1] --> different from original source
+        # batch = F.normalize(batch, dim=0)
+        # batch = torch.mul(batch, 2)
+        # batch = torch.subtract(batch, 1)
+
         padded_batch = pad_nextpow2(batch)
         fake, latent_i, latent_o = self.generator(padded_batch)
         # if self.training:
@@ -445,7 +460,7 @@ class GeneratorLoss(nn.Module):
     """
 
     def __init__(self, wadv=1, wcon=50, wenc=1):
-        super().__init__()
+        super().__init__()  
 
         self.loss_enc = nn.SmoothL1Loss()
         self.loss_adv = nn.MSELoss()
@@ -474,7 +489,7 @@ class GeneratorLoss(nn.Module):
         error_adv = self.loss_adv(pred_real, pred_fake)
 
         loss = error_adv * self.wadv + error_con * self.wcon + error_enc * self.wenc
-        return loss
+        return loss, error_enc, error_con, error_adv
 
 
 class DiscriminatorLoss(nn.Module):

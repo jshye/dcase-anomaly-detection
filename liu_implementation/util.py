@@ -235,3 +235,4 @@ def plot_probability(label_list, anomaly_prob, idx, anomaly=True, show=False):
         plt.show()
     else:
         return fig
+        
