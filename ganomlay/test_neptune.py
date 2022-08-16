@@ -7,7 +7,9 @@ from data_utils import *
 from ganomaly_model import *
 import joblib
 import csv
-import matplotlib.pyplot as plt
+
+from sklearn import metrics
+from scipy.stats import hmean
 
 import neptune.new as neptune
 from getpass import getpass
@@ -25,7 +27,7 @@ args = parser.parse_args()
 DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 
-def main(config, epoch, decision_threshold=0.7):
+def main(config, epoch):
     assert args.resume_run is not None, 'Choose Neptune run ID'
     ####### ***** neptune ***** #######
     # NEPTUNE_API_TOKEN = getpass('Enter your private Neptune API token: ')
@@ -78,22 +80,12 @@ def main(config, epoch, decision_threshold=0.7):
         model.eval()
         model.load_state_dict(torch.load(model_file))
 
-        # score_distr_file_path = os.path.join(config['model_save_dir'], f'score_distr_{machine_type}_epoch{epoch}.pkl')
-        # decision_threshold = util.calc_decision_threshold(score_distr_file_path, config)
-        
-        ####### ***** neptune ***** #######
-        run[f'test/{machine_type}/decision_threshold'].log(decision_threshold)
-        ####### ***** ******* ***** #######
-        
         for dir_name in ["source_test", "target_test"]:
+            domain = dir_name.split('_', 1)[0]
+            domain_auc = []
             for section_name in get_section_names(target_dir, dir_name=dir_name):
+                section = section_name.split('_', 1)[1]
 
-                temp_array = np.nonzero(trained_section_names == section_name)[0]  # search for section_name
-                if temp_array.shape[0] == 0:
-                    section_idx = -1
-                else:
-                    section_idx = temp_array[0]
-                
                 print(f'============== BEGIN TEST FOR A SECTION {section_name} OF {dir_name} ==============')
 
                 print("============= DATASET GENERATOR ==============")
@@ -113,16 +105,14 @@ def main(config, epoch, decision_threshold=0.7):
                 data_loader['test'] = get_eval_dataloader(dcase_dataset, config=config, machine_type=machine_type)
 
                 print("================== RUN TEST ==================")
-                anomaly_scores_all = []
-                anomaly_decision = []
-                anomaly_true = []
-
-                # max_score = torch.tensor(float('-inf'), dtype=torch.float32)
-                # min_score = torch.tensor(float('inf'), dtype=torch.float32)
-
+                anomaly_scores = []
                 normal_scores = []    # anomaly scores of normal data
                 abnormal_scores = []  # anomaly scores of abnormal data
-                
+                anomaly_true = []
+
+                anomaly_plot_cnt = 0
+                normal_plot_cnt = 0
+
                 with tqdm(data_loader['test'], bar_format='{l_bar}{bar:40}{r_bar}{bar:-40b}') as pbar:
                     for x, s, y in pbar:  # data, section id, anomaly
                         x = x.to(DEVICE).float()
@@ -130,93 +120,57 @@ def main(config, epoch, decision_threshold=0.7):
                         y = y.to(DEVICE).long()
 
                         padded, fake, latent_i, latent_o = model(x)
-                        anomaly_scores = torch.mean(torch.pow((latent_i - latent_o), 2), dim=[1,2,3])
-                        # anomaly_scores_all.extend(anomaly_scores)
+                        anomaly_scores_batch = torch.mean(torch.pow((latent_i - latent_o), 2), dim=[1,2,3])
+                        # anomaly_scores.extend(anomaly_scores_batch)
                         
                         for i in range(len(y)):
-                            anomaly_scores_all.append(anomaly_scores[i].detach().cpu())
-                            if y[i] == 0:
-                                normal_scores.append(anomaly_scores[i].detach().cpu())
-                            else:
-                                abnormal_scores.append(anomaly_scores[i].detach().cpu())
+                            anomaly_scores.append(anomaly_scores_batch[i].detach().cpu())
 
-                        # max_score = max(max_score, torch.max(anomaly_scores))
-                        # min_score = min(min_score, torch.min(anomaly_scores))
+                            # for verification
+                            if y[i] == 0:
+                                normal_scores.append(anomaly_scores_batch[i].detach().cpu())
+                                if normal_plot_cnt < 3:
+                                    recons_fig = plot_recons(x[i], padded[i], fake[i], anomaly=False, epoch=epoch, show=False)
+                                    run[f'test/{machine_type}/{domain}_domain/section{section}/normal_recons/{i}'].log(recons_fig)
+                                    plt.close()
+                                    normal_plot_cnt += 1
+                            else:
+                                abnormal_scores.append(anomaly_scores_batch[i].detach().cpu())
+                                if anomaly_plot_cnt < 3:
+                                    recons_fig = plot_recons(x[i], padded[i], fake[i], anomaly=True, epoch=epoch, show=False)
+                                    run[f'test/{machine_type}/{domain}_domain/section{section}/anomaly_recons/{i}'].log(recons_fig)
+                                    plt.close()
+                                    anomaly_plot_cnt += 1
 
                         anomaly_true.extend(y.cpu())
 
-                    min_score = np.min(anomaly_scores_all)
-                    max_score = np.max(anomaly_scores_all)
+                auc = metrics.roc_auc_score(anomaly_true, anomaly_scores)
+                fpr, tpr, thresholds = metrics.roc_curve(anomaly_true, anomaly_scores)
+                domain_auc.append(auc)
 
-                    if min_score < 0:
-                        max_score -= min_score
-                        min_score = 0
-
-                    # anomaly_scores_all = torch.div(
-                    #     torch.sub(anomaly_scores_all, min_score), torch.sub(max_score, min_score)
-                    # )
-                    # normal_scores = torch.div(
-                    #     torch.sub(torch.as_tensor(normal_scores), min_score), torch.sub(max_score, min_score)
-                    # )
-                    # abnormal_scores = torch.div(
-                    #     torch.sub(torch.as_tensor(abnormal_scores), min_score), torch.sub(max_score, min_score)
-                    # )
-                    anomaly_scores_all = np.divide(
-                        np.subtract(anomaly_scores_all, min_score), np.subtract(max_score, min_score)
-                    )
-                    normal_scores = np.divide(
-                        np.subtract(normal_scores, min_score), np.subtract(max_score, min_score)
-                    )
-                    abnormal_scores = np.divide(
-                        np.subtract(abnormal_scores, min_score), np.subtract(max_score, min_score)
-                    )
-
-                    for score in anomaly_scores_all:
-                        if score > decision_threshold:
-                            anomaly_decision.append(1)
-                        else:
-                            anomaly_decision.append(0)
-
-
-                eval_scores = util.calc_evaluation_scores(y_true=anomaly_true,
-                                                          y_pred=anomaly_decision,
-                                                          decision_threshold=decision_threshold,
-                                                          config=config)
-                auc, p_auc, precision, recall, f1_score = eval_scores
 
                 with open(csv_logdir, 'a') as f:
                     section = section_name.split('_', 1)[1]
                     domain = dir_name.split('_', 1)[0]
-                    f.write(f'{section},{domain},{auc},{p_auc},{precision},{recall},{f1_score}\n')
-  
+                    f.write(f'{section},{domain},{auc}\n')
+    
                 ####### ***** neptune ***** #######
                 run[f'test/{machine_type}/{domain}_domain/section{section}/AUC'].log(auc)
-                run[f'test/{machine_type}/{domain}_domain/section{section}/pAUC'].log(p_auc)
-                run[f'test/{machine_type}/{domain}_domain/section{section}/precision'].log(precision)
-                run[f'test/{machine_type}/{domain}_domain/section{section}/recall'].log(recall)
-                run[f'test/{machine_type}/{domain}_domain/section{section}/F1_score'].log(f1_score)
+
+                roc = util.plot_roc(fpr, tpr, auc, show=False)
+                run[f'test/{machine_type}/{domain}_domain/section{section}/roc'].log(roc)
+                plt.close()
+
+                thresholds_str = ', '.join(str(t) for t in thresholds)
+                run[f'test/{machine_type}/{domain}_domain/section{section}/thresholds'].log(thresholds_str)
                 
                 fig = util.plot_anomaly_score_distrib(normal_scores, abnormal_scores, epoch, decimals=2, show=False)
                 run[f'test/{machine_type}/{domain}_domain/section{section}/anomaly_score'].log(fig)
                 plt.close()
 
-                performance['section'].append(eval_scores)
-                performance['all'].append(eval_scores)
-            
-            csv_lines = util.calc_performance_section(performance['section'])
-            with open(csv_logdir, 'a') as f:
-                writer = csv.writer(f, lineterminator="\n")
-                writer.writerows(csv_lines)
+            auc_hmean = hmean(domain_auc)
+            run[f'test/{machine_type}/{domain}_domain/auc_hmean'].log(auc_hmean)
 
-        # del model, dcase_dataset, data_loader
-
-        csv_lines = util.calc_performance_all(performance['all'])
-        with open(csv_logdir, 'a') as f:
-            writer = csv.writer(f, lineterminator="\n")
-            writer.writerows(csv_lines)
-
-        ####### ***** neptune ***** #######
-        # run[f'test/{machine_type}/epoch{epoch}'].upload(csv_logdir)
         run.stop()
         ####### ***** ******* ***** #######
 
@@ -227,4 +181,4 @@ if __name__ == "__main__":
     
     max_epoch = args.max_epoch
     for i in range(1, max_epoch+1):
-        main(config, i, decision_threshold=0.1)
+        main(config, i)

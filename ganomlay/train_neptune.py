@@ -40,7 +40,7 @@ def main(config):
         run = neptune.init(
             project='seonghye/dcase-anomaly',
             api_token=NEPTUNE_API_TOKEN,
-            tags=['classification'],
+            tags=['reconstruction'],
             description=input('Enter Neptune Description:'),
             capture_stdout=False,
             capture_stderr=False,
@@ -79,8 +79,6 @@ def main(config):
             for k, v in config.items():
                 f.write(k + ',' + str(v) + '\n')
             f.write('epoch, train_loss_g, train_loss_d, val_loss_g, val_loss_d\n')
-                # f.write(k + ',' + str(v) + '\n')
-            # f.write('epoch,train_loss,val_loss,val_acc\n')
 
         print("============= DATASET GENERATOR ==============")
         files, labels = file_list_generator(target_dir=target_dir,
@@ -102,7 +100,8 @@ def main(config):
 
         print("================ BUILD MODEL =================")
         model = GanomalyModel(
-            input_size=(128,313),
+            # input_size=(128,313),
+            input_size=(128,128),
             latent_vec_size=100,
             num_input_channels=1,
             n_features=64,
@@ -114,11 +113,11 @@ def main(config):
         criterion_d = DiscriminatorLoss()
 
         optimizer_g = torch.optim.Adam(params=model.generator.parameters(),
-                                       lr=config['training']['learning_rate'],
+                                       lr=config['training']['generator_learning_rate'],
                                        betas=(0.5, 0.999),
                                        )
         optimizer_d = torch.optim.Adam(params=model.discriminator.parameters(),
-                                       lr=config['training']['learning_rate'],
+                                       lr=config['training']['discriminator_learning_rate'],
                                        betas=(0.5, 0.999),
                                        )
 
@@ -186,8 +185,6 @@ def main(config):
                 if scheduler is not None:
                     scheduler.step()
                 
-                # pbar.set_postfix({'epoch': epoch, 'train_loss_g': np.mean(train_loss_g)})
-
             train_loss_g = np.mean(train_loss_g)
             train_losses_g.append(train_loss_g)
             train_loss_d = np.mean(train_loss_d)
@@ -197,19 +194,6 @@ def main(config):
             model.eval()
             val_loss_g = []
             val_loss_d = []
-            anomaly_scores = []
-            anomaly_decision = []
-            anomaly_true = []
-
-            # if epoch > 1:
-            #     ## calculate decision threshold from gamma score_distr_*.pkl
-            #     score_file_path = os.path.join(
-            #         config['model_save_dir'], f'score_distr_{machine_type}_epoch{epoch-1}.pkl'
-            #     )
-            #     decision_threshold = util.calc_decision_threshold(score_file_path, config)
-            # else:
-            #     decision_threshold = 0.
-            decision_threshold = 0.5
 
             with torch.no_grad():
                 with tqdm(data_loader['val'], ncols=100, leave=False, desc=f'Epoch {epoch:3d}') as pbar:
@@ -236,18 +220,6 @@ def main(config):
                         run[f'training/{machine_type}/valid/batch/error_adv'].log(error_adv.item())
                         ####### ***** ******* ***** #######
 
-                        # for i in range(len(x)):
-                        #     # score = util.calc_anomaly_score(torch.unsqueeze(out[i], axis=0).detach(), int(s[i].item()))
-                        #     score = torch.mean(torch.pow((latent_i[i] - latent_o[i]), 2), dim=1).view(-1)[:].cpu()
-                        #     import pdb; pdb.set_trace()
-                        #     anomaly_scores.append(score)
-
-                        #     if score > decision_threshold:
-                        #         anomaly_decision.append(1)
-                        #     else:
-                        #         anomaly_decision.append(0)
-
-                        # anomaly_scores = torch.mean(torch.pow((latent_i - latent_o), 2), dim=1).view(-1)
                         anomaly_scores = torch.mean(torch.pow((latent_i - latent_o), 2), dim=[1,2,3])
 
                         # normalize anomaly scores to [0,1]
@@ -257,38 +229,16 @@ def main(config):
                             torch.sub(anomaly_scores, min_score), torch.sub(max_score, min_score)
                         )
 
-                        for score in anomaly_scores:
-                            if score > decision_threshold:
-                                anomaly_decision.append(1)
-                            else:
-                                anomaly_decision.append(0)
-
-                        anomaly_true.extend(y.cpu())
-
-                    # pbar.set_postfix({'epoch': epoch, 'val_loss': np.mean(val_loss), 'val_acc': val_acc})
-                
-                eval_scores = util.calc_evaluation_scores(y_true=anomaly_true,
-                                                          y_pred=anomaly_decision,
-                                                          decision_threshold=decision_threshold,
-                                                          config=config)
-                auc, p_auc, precision, recall, f1_score = eval_scores
-
                 val_loss_g = np.mean(val_loss_g)
                 val_losses_g.append(val_loss_g)
                 val_loss_d = np.mean(val_loss_d)
                 val_losses_d.append(val_loss_d)
-
-            ## fit gamma distribution and save to score_distr_{machine_type}_epoch{epoch}.pkl
-            # gamma_params = util.fit_gamma_dist(anomaly_scores, machine_type, epoch, config)
             
-            ## calculate decision threshold from gamma score_distr_*.pkl
-            # decision_threshold = util.calc_decision_threshold(machine_type, epoch, config)
-            
-            # print(f'[Epoch {epoch:3d}] train_loss: {train_loss:.4f}, val_loss: {val_loss:.4f}, val_acc:{val_acc:.2f}%\n')
-            print(f'[Epoch {epoch:3d}] train_loss_g: {train_loss_g:.4f}, val_loss_g: {val_loss_g:.4f}')
-            print(f'            train_loss_d: {train_loss_d:.4f}, val_loss_d: {val_loss_d:.4f}')
+            # print(f'[Epoch {epoch:3d}] train_loss_g: {train_loss_g:.4f}, val_loss_g: {val_loss_g:.4f}')
+            # print(f'            train_loss_d: {train_loss_d:.4f}, val_loss_d: {val_loss_d:.4f}')
+            print(f'[Epoch {epoch:3d}] train_loss_g: {train_loss_g:.4f}, val_loss_g: {val_loss_g:.4f}, train_loss_d: {train_loss_d:.4f}, val_loss_d: {val_loss_d:.4f}')
 
-
+ 
             with open(csv_logdir, 'a') as f:
                 f.write(f'{epoch}, {train_loss_g}, {train_loss_d}, {val_loss_g}, {val_loss_d}\n')
 
@@ -297,16 +247,7 @@ def main(config):
             run[f'training/{machine_type}/valid/epoch/loss_g'].log(val_loss_g)
             run[f'training/{machine_type}/train/epoch/loss_d'].log(train_loss_d)
             run[f'training/{machine_type}/valid/epoch/loss_d'].log(val_loss_d)
-            # run[f'training/{machine_type}/valid/epoch/accuracy'].log(val_acc)
-            run[f'training/{machine_type}/valid/epoch/AUC'].log(auc)
-            run[f'training/{machine_type}/valid/epoch/pAUC'].log(p_auc)
-            run[f'training/{machine_type}/valid/epoch/precision'].log(precision)
-            run[f'training/{machine_type}/valid/epoch/recall'].log(recall)
-            run[f'training/{machine_type}/valid/epoch/F1_score'].log(f1_score)
-            run[f'training/{machine_type}/valid/epoch/decision_threshold'].log(decision_threshold)
             ####### ***** ******* ***** #######    
-            
-            # util.visualize(train_losses, val_losses, plot_logdir)
 
             if args.save_ckpt:
                 ckpt_path = os.path.join(config['model_save_dir'], f'model_{machine_type}_epoch{epoch}.pt')
