@@ -1,0 +1,716 @@
+config
+dev_directory,D:/dcase/dev_data
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 50, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.8890186154416629,0.34752609048570904,100.0
+2,0.22718089845563685,0.08227621125323432,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.9064655761633601,0.34464667098862783,100.0
+2,0.25134120642074514,0.08997824149472373,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.8552639409899712,0.4003227438245501,100.0
+2,0.2467328364561711,0.0772765821644238,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_directory,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.873188174196652,0.4652765010084425,100.0
+2,0.25447498980377403,0.04265256438936506,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.8863338168178286,0.5265780942780631,100.0
+2,0.23438879009336233,0.09142099746635982,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+max_fpr,0.1
+decision_threshold,0.9
+ext,wav
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.8670234563095229,0.49376425572804045,100.0
+2,0.23119045035647495,0.0843262832079615,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.9731709169489997,0.7274923750332424,100.0
+2,0.28375576210341286,0.10644003642456872,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.9176045528479985,0.6791283914021083,100.0
+2,0.24983315781823226,0.10827006080320903,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.8263169558984893,4.7125870159694125,0.0
+2,0.23292095812835864,0.06923060757773263,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.9003819429448673,0.5057133521352496,100.0
+2,0.43335962508405956,0.3242726709161486,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.9037949229989733,0.5109707372529166,100.0
+2,0.431059400417975,0.38091746398380827,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.9059003995997565,0.6054074253354754,100.0
+2,0.445203815719911,0.3686166192804064,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.8085029348731041,0.4883114014353071,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.9233919243727412,0.6729635851723808,100.0
+2,0.4375135840049812,0.35938874738557,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.8704699991004807,0.3513135441711971,100.0
+2,0.4306508020630905,0.2705893133367811,100.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'input_samples': 16384, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'input_samples': 16384, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'num_epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'input_samples': 16384, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.8843839963277181,1.0909249101366316,0.0
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'num_epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'input_samples': 16384, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'num_epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'input_samples': 16384, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'num_epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'input_samples': 16384, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+config
+dev_directory,D:/dcase/dev_data_tmp
+eval_directory,D:/dcase/eval_data
+train_log_dir,./train_log/lopez-2021-1
+model_save_dir,./model/lopez-2021-1
+result_dir,./result/lopez-2021-1
+result_file,result.csv
+training,{'learning_rate': 0.001, 'num_epochs': 2, 'shuffle': True, 'validation_split': 0.1, 'weight_decay': 0.0, 'lr_step_size': 50, 'lr_gamma': 0.5, 'verbose': 1}
+ext,wav
+max_fpr,0.1
+decision_threshold,0.9
+ToyCar,{'batch_size': 128, 'input_samples': 16384, 'n_mels': 128, 'n_frames': 1, 'n_hop_frames': 1, 'n_fft': 4096, 'hop_length': 80, 'power': 2.0}
+ToyTrain,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+fan,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+gearbox,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+pump,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+slider,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+valve,{'n_mels': 128, 'n_frames': 15, 'n_hop_frames': 1, 'n_fft': 1024, 'hop_length': 512, 'power': 2.0}
+epoch,train_loss,val_loss,val_acc
+1,0.7983005177556423,0.43520589811461313,100.0
+2,0.35605631428852413,0.2943359613418579,100.0

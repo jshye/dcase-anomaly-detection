@@ -2,18 +2,15 @@ dev_directory: D:/dcase/dev_data_tmp
 eval_directory: D:/dcase/eval_data
 # dev_directory: /data/vizwave/dcase/dev_data
 # eval_directory: /data/vizwave/dcase/eval_data
-train_log_dir: ./train_log/lopez-2021-1
-model_save_dir: ./model/lopez-2021-1
-result_dir: ./result/lopez-2021-1
+train_log_dir: ./train_log/lopez2021-edit_data_utils
+model_save_dir: ./model/lopez2021-edit_data_utils
+result_dir: ./result/lopez2021-edit_data_utils
 result_file: result.csv
 
-max_fpr: 0.1
-decision_threshold: 0.9
-ext: wav
-
+######### hyperparameters ##########
 training:
   learning_rate: 0.001
-  epochs : 2
+  num_epochs : 2
   # batch_size : 512
   shuffle : True
   validation_split : 0.1
@@ -22,15 +19,23 @@ training:
   lr_gamma: 0.5
   verbose : 1
 
+ext: wav
+
+######### gamma distribution #########
+max_fpr: 0.1
+decision_threshold: 0.9  # q in gamma.ppf
+
 ########### machine config ###########
 ToyCar:
   batch_size: 128
-  n_mels: 128
-  n_frames: 1
-  n_hop_frames: 1
+  input_samples: 16384
+  # n_mels: 128       # paper value: 2048
+  n_mels: 2048        # paper value: 2048
+  n_frames: 2049      # not mentioned in paper
+  n_hop_frames: 1     # not mentioned in paper
   n_fft: 4096
   hop_length: 80
-  power: 2.0
+  power: 2.0          # not mentioned in paper
 
 ToyTrain:
   n_mels: 128

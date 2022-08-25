@@ -14,6 +14,7 @@ parser.add_argument('-m', '--machine_type', nargs='*', type=str,
 args = parser.parse_args()
 
 DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+print(DEVICE)
 
 
 def main(config):
@@ -64,7 +65,7 @@ def main(config):
                                                                   machine_type=machine_type)
         print("================ BUILD MODEL =================")
         model = Lopez2021().to(DEVICE)
-
+        import pdb; pdb.set_trace()
         criterion = torch.nn.CrossEntropyLoss()
 
         optimizer = torch.optim.Adam(params=model.parameters(),

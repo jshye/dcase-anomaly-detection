@@ -150,13 +150,22 @@ def extract_feature(file_name, machine_config):
 
     # generate melspectrogram
     audio, sample_rate = torchaudio.load(file_name)
-    melspectrogram = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
+
+    # TODO: change sampling rate
+    if sample_rate != machine_config['input_samples']:
+        resampler = torchaudio.transforms.Resample(sample_rate,
+                                                   machine_config['input_samples'],
+                                                   dtype=audio.dtype)
+        audio = resampler(audio)
+
+    melspectrogram = torchaudio.transforms.MelSpectrogram(
+                                                        #   sample_rate=sample_rate,
                                                           n_fft=n_fft,
                                                           hop_length=hop_length,
                                                           n_mels=n_mels,
                                                           power=power).to(device)
     audio = audio.to(device)
-    mel_spectrogram = melspectrogram(audio)  # (channel, n_mels, time)
+    mel_spectrogram = melspectrogram(audio)  # (channel, n_mels, n_frames)
 
     # convert melspectrogram to log mel energies
     log_mel_spectrogram = (
@@ -167,21 +176,23 @@ def extract_feature(file_name, machine_config):
             )
     )
 
-    # calculate total vector size
-    n_vectors = log_mel_spectrogram.shape[-1] - n_frames + 1
+    return log_mel_spectrogram.cpu()
 
-    # skip too short clips
-    if n_vectors < 1:
-        return torch.empty((0, 0, dims))
+    # # calculate total vector size
+    # n_vectors = log_mel_spectrogram.shape[-1] - n_frames + 1
 
-    # generate feature vectors by concatenating multiframes
-    vectors = torch.zeros((n_vectors, dims),
-                           dtype=log_mel_spectrogram.dtype,
-                           device=log_mel_spectrogram.device)
-    for frame in range(n_frames):
-        vectors[:, n_mels * frame : n_mels * (frame + 1)] = log_mel_spectrogram[..., frame : frame + n_vectors].transpose(-1,-2).squeeze(0)
+    # # skip too short clips
+    # if n_vectors < 1:
+    #     return torch.empty((0, 0, dims))
 
-    return vectors.cpu()
+    # # generate feature vectors by concatenating multiframes
+    # vectors = torch.zeros((n_vectors, dims),
+    #                        dtype=log_mel_spectrogram.dtype,
+    #                        device=log_mel_spectrogram.device)
+    # for frame in range(n_frames):
+    #     vectors[:, n_mels * frame : n_mels * (frame + 1)] = log_mel_spectrogram[..., frame : frame + n_vectors].transpose(-1,-2).squeeze(0)
+
+    # return vectors.cpu()
 
 
 class DcaseDataset(torch.utils.data.Dataset):
@@ -192,47 +203,64 @@ class DcaseDataset(torch.utils.data.Dataset):
 
         for file_id, (file_name, label) in tqdm(enumerate(zip(files, labels))):
             features = extract_feature(file_name, self.machine_config)
-            features = features[:: self.machine_config['n_hop_frames'], :]
+            # features = features[:: self.machine_config['n_hop_frames'], :]
 
-            sid = int(os.path.basename(file_name)[8:10])
+            sid = int(os.path.basename(file_name)[8:10])  # section id
 
             if file_id == 0:
+                # dataset = np.zeros(
+                #     (
+                #         features.shape[0] * len(files),
+                #         self.machine_config['n_mels'] * self.machine_config['n_frames'],
+                #     ),
+                #     np.float32,
+                # )
+                # section_ids = np.zeros((features.shape[0] * len(files)), dtype=int)
+                # anomaly_label = np.zeros((features.shape[0] * len(files)), dtype=int)
+
                 dataset = np.zeros(
                     (
-                        features.shape[0] * len(files),
-                        self.machine_config['n_mels'] * self.machine_config['n_frames'],
+                        len(files),
+                        features.shape[0],  # channel
+                        self.machine_config['n_mels'],
+                        self.machine_config['n_frames'],
                     ),
                     np.float32,
                 )
-                section_ids = np.zeros((features.shape[0] * len(files)), dtype=int)
-                anomaly_label = np.zeros((features.shape[0] * len(files)), dtype=int)
+                section_ids = np.zeros(len(files), dtype=int)
+                anomaly_label = np.zeros(len(files), dtype=int)
 
-            dataset[
-                features.shape[0] * file_id : features.shape[0] * (file_id + 1), :
-            ] = features
+            # dataset[
+            #     features.shape[0] * file_id : features.shape[0] * (file_id + 1), :
+            # ] = features
             
-            section_ids[
-                features.shape[0] * file_id : features.shape[0] * (file_id + 1)
-            ] = sid
+            # section_ids[
+            #     features.shape[0] * file_id : features.shape[0] * (file_id + 1)
+            # ] = sid
 
-            anomaly_label[
-                features.shape[0] * file_id : features.shape[0] * (file_id + 1)
-            ] = label
+            # anomaly_label[
+            #     features.shape[0] * file_id : features.shape[0] * (file_id + 1)
+            # ] = label
+
+            dataset[file_id : (file_id + 1), :] = features
+            section_ids[file_id : (file_id + 1)] = sid
+            anomaly_label[file_id : (file_id + 1)] = label
 
         self.feat_data = dataset.reshape(
             (
                 dataset.shape[0],
-                # 1,  # number of channels
-                self.machine_config['n_frames'],
+                1,  # number of channels
                 self.machine_config['n_mels'],
+                self.machine_config['n_frames'],
             )
         )
         self.section_ids = section_ids
         self.anomaly_label = anomaly_label
 
-        train_size = int(len(dataset) * (1.0 - self.config['training']['validation_split']))
-        val_size = int(len(dataset) * self.config['training']['validation_split'])
+        # train_size = int(len(dataset) * (1.0 - self.config['training']['validation_split']))
+        # val_size = int(len(dataset) * self.config['training']['validation_split'])
         # print(f'train size: {train_size}, val_size: {val_size}')
+        print(f'Feature Shape:', self.feat_data.shape)
 
     def __len__(self):
         return self.feat_data.shape[0]  # the number of samples
@@ -270,58 +298,58 @@ def get_dataloader(dataset, config, machine_type):
     return data_loader_train, data_loader_val
 
 
-##### Dataset for eval mode ####
-class DcaseEvalDataset(torch.utils.data.Dataset):
-    def __init__(self, files, config, machine_config, transform=None):
-        self.transform = transform
-        self.config = config
-        self.machine_config = machine_config
+# ##### Dataset for eval mode ####
+# class DcaseEvalDataset(torch.utils.data.Dataset):
+#     def __init__(self, files, config, machine_config, transform=None):
+#         self.transform = transform
+#         self.config = config
+#         self.machine_config = machine_config
 
-        for file_id, file_name in tqdm(enumerate(files)):
-            features = extract_feature(file_name, self.machine_config)
-            features = features[:: self.machine_config['n_hop_frames'], :]
+#         for file_id, file_name in tqdm(enumerate(files)):
+#             features = extract_feature(file_name, self.machine_config)
+#             features = features[:: self.machine_config['n_hop_frames'], :]
 
-            if file_id == 0:
-                dataset = np.zeros(
-                    (
-                        features.shape[0] * len(files),
-                        self.machine_config['n_mels'] * self.machine_config['n_frames'],
-                    ),
-                    np.float32,
-                )
-            dataset[
-                features.shape[0] * file_id : features.shape[0] * (file_id + 1), :
-            ] = features
+#             if file_id == 0:
+#                 dataset = np.zeros(
+#                     (
+#                         features.shape[0] * len(files),
+#                         self.machine_config['n_mels'] * self.machine_config['n_frames'],
+#                     ),
+#                     np.float32,
+#                 )
+#             dataset[
+#                 features.shape[0] * file_id : features.shape[0] * (file_id + 1), :
+#             ] = features
             
 
-        self.feat_data = dataset.reshape(
-            (
-                dataset.shape[0],
-                # 1,  # number of channels
-                self.machine_config['n_frames'],
-                self.machine_config['n_mels'],
-            )
-        )
-        print(f'test size:', len(dataset))
+#         self.feat_data = dataset.reshape(
+#             (
+#                 dataset.shape[0],
+#                 # 1,  # number of channels
+#                 self.machine_config['n_frames'],
+#                 self.machine_config['n_mels'],
+#             )
+#         )
+#         print(f'test size:', len(dataset))
 
-    def __len__(self):
-        return self.feat_data.shape[0]  # the number of samples
+#     def __len__(self):
+#         return self.feat_data.shape[0]  # the number of samples
 
-    def __getitem__(self, idx):
-        sample = self.feat_data[idx, :]
-        if self.transform:
-            sample = self.transform(sample)
-        return sample
+#     def __getitem__(self, idx):
+#         sample = self.feat_data[idx, :]
+#         if self.transform:
+#             sample = self.transform(sample)
+#         return sample
 
 
-def get_eval_dataloader(dataset, config, machine_type):
-    data_loader_test = torch.utils.data.DataLoader(
-        Subset(dataset, list(range(len(dataset)))),
-        batch_size=config[machine_type]['batch_size'],
-        shuffle=False,
-        drop_last=False,
-    )
+# def get_eval_dataloader(dataset, config, machine_type):
+#     data_loader_test = torch.utils.data.DataLoader(
+#         Subset(dataset, list(range(len(dataset)))),
+#         batch_size=config[machine_type]['batch_size'],
+#         shuffle=False,
+#         drop_last=False,
+#     )
 
-    print(f'test size: {int(len(dataset))}')
+#     print(f'test size: {int(len(dataset))}')
     
-    return data_loader_test
+#     return data_loader_test

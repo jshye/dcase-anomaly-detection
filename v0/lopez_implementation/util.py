@@ -56,9 +56,7 @@ def calc_evaluation_scores(y_true, y_pred, decision_threshold, config):
         p_auc = 0
 
     _, false_positive, false_negative, true_positive = metrics.confusion_matrix(
-        y_true, y_pred
-        # y_true, [1 if x > decision_threshold else 0 for x in y_pred]
-    ).ravel()
+        y_true, y_pred, labels=[True, False]).ravel()
 
     prec = true_positive / np.maximum(
         true_positive + false_positive, sys.float_info.epsilon
@@ -163,8 +161,8 @@ import matplotlib.pyplot as plt
 
 def visualize(loss, val_loss, fname):
     fig = plt.figure(figsize=(7,5))
-    plt.plot(loss, 'o-', label='train')
-    plt.plot(val_loss, 'x-', label='valid')
+    plt.plot(loss, 'o-', label='train', markersize=3)
+    plt.plot(val_loss, 'x-', label='valid', markersize=3)
     plt.grid()
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
