@@ -242,7 +242,8 @@ class DcaseDataset(torch.utils.data.Dataset):
             #     features.shape[0] * file_id : features.shape[0] * (file_id + 1)
             # ] = label
 
-            dataset[file_id : (file_id + 1), :] = features
+            # dataset[file_id : (file_id + 1), :] = features
+            dataset[file_id : (file_id + 1), :] = features[:,:,:self.machine_config['n_frames']]
             section_ids[file_id : (file_id + 1)] = sid
             anomaly_label[file_id : (file_id + 1)] = label
 
@@ -298,48 +299,48 @@ def get_dataloader(dataset, config, machine_type):
     return data_loader_train, data_loader_val
 
 
-##### Dataset for eval mode ####
-class DcaseEvalDataset(torch.utils.data.Dataset):
-    def __init__(self, files, config, machine_config, transform=None):
-        self.transform = transform
-        self.config = config
-        self.machine_config = machine_config
+# ##### Dataset for eval mode ####
+# class DcaseEvalDataset(torch.utils.data.Dataset):
+#     def __init__(self, files, config, machine_config, transform=None):
+#         self.transform = transform
+#         self.config = config
+#         self.machine_config = machine_config
 
-        for file_id, file_name in tqdm(enumerate(files)):
-            features = extract_feature(file_name, self.machine_config)
-            features = features[:: self.machine_config['n_hop_frames'], :]
+#         for file_id, file_name in tqdm(enumerate(files)):
+#             features = extract_feature(file_name, self.machine_config)
+#             features = features[:: self.machine_config['n_hop_frames'], :]
 
-            if file_id == 0:
-                dataset = np.zeros(
-                    (
-                        features.shape[0] * len(files),
-                        self.machine_config['n_mels'] * self.machine_config['n_frames'],
-                    ),
-                    np.float32,
-                )
-            dataset[
-                features.shape[0] * file_id : features.shape[0] * (file_id + 1), :
-            ] = features
+#             if file_id == 0:
+#                 dataset = np.zeros(
+#                     (
+#                         features.shape[0] * len(files),
+#                         self.machine_config['n_mels'] * self.machine_config['n_frames'],
+#                     ),
+#                     np.float32,
+#                 )
+#             dataset[
+#                 features.shape[0] * file_id : features.shape[0] * (file_id + 1), :
+#             ] = features
             
 
-        self.feat_data = dataset.reshape(
-            (
-                dataset.shape[0],
-                # 1,  # number of channels
-                self.machine_config['n_frames'],
-                self.machine_config['n_mels'],
-            )
-        )
-        print(f'test size:', len(dataset))
+#         self.feat_data = dataset.reshape(
+#             (
+#                 dataset.shape[0],
+#                 # 1,  # number of channels
+#                 self.machine_config['n_frames'],
+#                 self.machine_config['n_mels'],
+#             )
+#         )
+#         print(f'test size:', len(dataset))
 
-    def __len__(self):
-        return self.feat_data.shape[0]  # the number of samples
+#     def __len__(self):
+#         return self.feat_data.shape[0]  # the number of samples
 
-    def __getitem__(self, idx):
-        sample = self.feat_data[idx, :]
-        if self.transform:
-            sample = self.transform(sample)
-        return sample
+#     def __getitem__(self, idx):
+#         sample = self.feat_data[idx, :]
+#         if self.transform:
+#             sample = self.transform(sample)
+#         return sample
 
 
 def get_eval_dataloader(dataset, config, machine_type):
