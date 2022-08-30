@@ -75,22 +75,30 @@ def file_to_logmel(filename, machine, config):
 
 
 class DcaseDataset(Dataset):
-    def __init__(self, files, machine, config, dim=1, transform=None):
+    def __init__(self, files, machine, config, dim=1, dim_split=None, transform=None):
         self.machine = machine
         self.config = config
         self.transform = transform
         self.dim = dim  # for future use: split spectrogram into channels
         self.input_shape = config['machine_config'][machine]['input_shape']
 
-        features = np.zeros(
-            (len(files), self.dim, self.input_shape[0], self.input_shape[1]),
-            np.float32,
-        )
-        sections = np.zeros(len(files), dtype=int)
-
         for i, filename in enumerate(tqdm(files, total=len(files))):
             log_mel = file_to_logmel(filename, self.machine, self.config)
-            features[i, :self.dim, :, :] = log_mel
+            if dim_split is None:
+                dim_split = log_mel.shape[-1] // self.dim
+
+            if i == 0:
+                features = np.zeros(
+                    (len(files), self.dim, self.input_shape[0], dim_split),
+                    np.float32,
+                )
+                sections = np.zeros(len(files), dtype=int)
+            
+            for d in range(self.dim - 1):
+                features[i, d:d+1, :, :] = log_mel[:, :, d*dim_split:(d+1)*dim_split]
+            
+            last_dim_split = log_mel.shape[-1] % dim_split
+            features[i, self.dim-1:self.dim, :, :last_dim_split] = log_mel[0, :, (self.dim-1)*dim_split:]
             section_id = int(os.path.basename(filename)[8:10])  # section_00 -> 0
             sections[i] = section_id
 
