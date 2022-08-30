@@ -1,0 +1,88 @@
+model:
+  name: ganomaly
+  task: reconstruction
+  criterion: mse_loss 
+  input_size: [128, 128]
+  input_channels: 3
+  wadv: 1
+  wcon: 50
+  wenc: 1
+
+dataset:
+  # dev_dir: /content/dataset/DCASE2021/dev_data
+  # eval_dir: /content/dataset/DCASE2021/eval_data
+  dev_dir: D:/dcase/dev_data
+  eval_dir: D:/dcase/eval_data
+
+settings:
+  seed: 42
+  train_batch_size: 32
+  test_batch_size: 32
+  lr_g: 1e-3
+  lr_d: 1e-3
+  weight_decay: 0.0
+  max_epoch: 64
+
+machine_config:
+  ToyCar:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+
+  slider:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+
+  ToyTrain:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+
+  fan:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+
+  gearbox:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+
+  pump:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+
+  valve:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
