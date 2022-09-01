@@ -20,8 +20,8 @@ def file_list_generator(data_dir, machine, mode, domain='source', ext='wav'):
         ext (str): audio file extension
 
     Returns:
-        normal_files ([str]): list of path to normal files
-        anomaly_files ([str]): list of path to anomaly files
+        normal_files ([str]): list of paths to normal files
+        anomaly_files ([str]): list of paths to anomaly files
     """
     assert machine in ['ToyCar', 'ToyTrain', 'fan', 'gearbox', 'pump', 'slider', 'valve']
     assert mode in ['train', 'test']
@@ -47,7 +47,11 @@ def file_list_generator(data_dir, machine, mode, domain='source', ext='wav'):
 
 
 def file_to_logmel(filename, machine, config):
-    """Convert an audio file to log-mel spectrogram"""
+    """Convert an audio file to log-mel spectrogram
+    Args:
+        filename (str): path to the audio file
+        machine (str): ex. ToyCar (in the case where each machine has different processing configs)
+    """
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     n_fft = config['machine_config'][machine]['n_fft']
@@ -79,26 +83,27 @@ class DcaseDataset(Dataset):
         self.machine = machine
         self.config = config
         self.transform = transform
-        self.dim = dim  # for future use: split spectrogram into channels
+        self.dim = dim              # the number of spectrogram slices
+        self.dim_split = dim_split  # the width of a sliced spectrogram
         self.input_shape = config['machine_config'][machine]['input_shape']
 
-        for i, filename in enumerate(tqdm(files, total=len(files))):
+        for i, filename in enumerate(tqdm(files, total=100)):
             log_mel = file_to_logmel(filename, self.machine, self.config)
-            if dim_split is None:
-                dim_split = log_mel.shape[-1] // self.dim
+            if self.dim_split is None:
+                self.dim_split = log_mel.shape[-1] // self.dim
 
             if i == 0:
                 features = np.zeros(
-                    (len(files), self.dim, self.input_shape[0], dim_split),
+                    (len(files), self.dim, self.input_shape[0], self.dim_split),
                     np.float32,
                 )
                 sections = np.zeros(len(files), dtype=int)
             
             for d in range(self.dim - 1):
-                features[i, d:d+1, :, :] = log_mel[:, :, d*dim_split:(d+1)*dim_split]
+                features[i, d:d+1, :, :] = log_mel[:, :, d*self.dim_split:(d+1)*self.dim_split]
             
-            last_dim_split = log_mel.shape[-1] % dim_split
-            features[i, self.dim-1:self.dim, :, :last_dim_split] = log_mel[0, :, (self.dim-1)*dim_split:]
+            last_dim_split = log_mel.shape[-1] % self.dim_split  # zero-pad if the last slice width < dim_split
+            features[i, self.dim-1:self.dim, :, :last_dim_split] = log_mel[0, :, (self.dim-1)*self.dim_split:]
             section_id = int(os.path.basename(filename)[8:10])  # section_00 -> 0
             sections[i] = section_id
 
@@ -128,12 +133,10 @@ def get_dataloader(dataset, batch_size=32, val=False, shuffle=False):
         random.shuffle(file_indices)  # shuffle sections
 
         dataloader = DataLoader(
-            # Subset(dataset, list(range(0, train_size))),
             Subset(dataset, file_indices[:train_size]),
             batch_size=batch_size, shuffle=shuffle, drop_last=True
         )
         valid_dataloader = DataLoader(
-            # Subset(dataset, list(range(train_size, len(dataset)))),
             Subset(dataset, file_indices[train_size:]),
             batch_size=batch_size, shuffle=False, drop_last=False
         )
