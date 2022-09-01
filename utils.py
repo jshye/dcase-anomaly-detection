@@ -43,5 +43,17 @@ def get_anomaly_score(config, x, output):
         max_confidence = torch.max(softmaxprob, dim=1).values
         anomaly_score = torch.tensor(1) - max_confidence
     elif config['model']['task'] == 'reconstruction':
-        anomaly_score = torch.nn.MSELoss(reduction='none')(output, x)
+        anomaly_score = torch.mean(torch.pow((output - x), 2), dim=[1,2,3])
     return anomaly_score.detach()
+
+def reshape_gan_output(src, real, fake, input_dim):
+    if input_dim > 1:
+        src = torch.cat(torch.unbind(src, dim=0), dim=-1).unsqueeze(0)
+        real = torch.cat(torch.unbind(real, dim=0), dim=-1).unsqueeze(0)
+        fake = torch.cat(torch.unbind(fake, dim=0), dim=-1).unsqueeze(0)
+    
+    src = src[0,:,:]
+    real = real[0,:,:]
+    fake = fake[0,:,:]
+    
+    return src, real, fake 
