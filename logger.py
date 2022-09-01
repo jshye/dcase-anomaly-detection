@@ -72,24 +72,24 @@ class GANSampleLogger:
 
         self.fig.add_subplot(self.num_samples, 4, idx+1)
         plt.imshow(src)
-        plt.colorbar(shrink=0.2)
+        plt.colorbar(shrink=0.4)
         plt.title('source')
 
         self.fig.add_subplot(self.num_samples, 4, idx+2)
         plt.imshow(real)
-        plt.colorbar(shrink=0.2)
+        plt.colorbar(shrink=0.4)
         plt.title('Generator Input')
 
         self.fig.add_subplot(self.num_samples, 4, idx+3)
         plt.imshow(fake)
-        plt.colorbar(shrink=0.2)
+        plt.colorbar(shrink=0.4)
         plt.title('Reconstruction')
 
         self.fig.add_subplot(self.num_samples, 4, idx+4)
         plt.imshow(real-fake, cmap=plt.get_cmap('RdGy'))
-        plt.colorbar(shrink=0.2)
+        plt.colorbar(shrink=0.4)
         plt.title('Error')
-        
+
         plt.suptitle(self.title, fontsize='large')
 
     def save_fig(self, save_path):
