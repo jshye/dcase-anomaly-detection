@@ -3,7 +3,7 @@ model:
   task: reconstruction
   criterion: mse_loss 
   input_size: [128, 128]
-  input_channels: 3
+  input_dim: 3
   wadv: 1
   wcon: 50
   wenc: 1

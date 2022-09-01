@@ -5,8 +5,8 @@ model:
   criterion: cross_entropy_loss 
 
 dataset:
-  dev_dir: /content/dataset/DCASE2021/dev_data
-  eval_dir: /content/dataset/DCASE2021/eval_data
+  dev_dir: D:/dcase/dev_data
+  eval_dir: D:/dcase/eval_data
 
 settings:
   seed: 42

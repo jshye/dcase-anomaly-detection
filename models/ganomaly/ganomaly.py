@@ -292,7 +292,7 @@ class Ganomaly(nn.Module):
         super(Ganomaly, self).__init__()
         self.input_size = config['model']['input_size']
         self.latent_vec_size = 100
-        self.num_input_channels = config['model']['input_channels']
+        self.num_input_channels = config['model']['input_dim']
         self.n_features = 64
         self.extra_layers = 0
         self.add_final_conv_layer = True
