@@ -84,26 +84,30 @@ class DcaseDataset(Dataset):
         self.config = config
         self.transform = transform
         self.dim = dim              # the number of spectrogram slices
-        self.dim_split = dim_split  # the width of a sliced spectrogram
+        self.slice_w = dim_split  # the width of a sliced spectrogram
         self.input_shape = config['machine_config'][machine]['input_shape']
+
+        assert len(files) > 0, 'Empty file list'
 
         for i, filename in enumerate(tqdm(files, total=100)):
             log_mel = file_to_logmel(filename, self.machine, self.config)
-            if self.dim_split is None:
-                self.dim_split = log_mel.shape[-1] // self.dim
+            if self.slice_w is None:
+                self.slice_w = log_mel.shape[-1] // self.dim
 
             if i == 0:
-                features = np.zeros(
-                    (len(files), self.dim, self.input_shape[0], self.dim_split),
+                features = np.zeros(  # zero-pad if the last slice width < slice_w
+                    (len(files), self.dim, self.input_shape[0], self.slice_w),
                     np.float32,
                 )
                 sections = np.zeros(len(files), dtype=int)
             
+            last_slice_w = self.input_shape[1]
             for d in range(self.dim - 1):
-                features[i, d:d+1, :, :] = log_mel[:, :, d*self.dim_split:(d+1)*self.dim_split]
-            
-            last_dim_split = log_mel.shape[-1] % self.dim_split  # zero-pad if the last slice width < dim_split
-            features[i, self.dim-1:self.dim, :, :last_dim_split] = log_mel[0, :, (self.dim-1)*self.dim_split:]
+                features[i, d:d+1, :, :] = log_mel[:, :, d*self.slice_w:(d+1)*self.slice_w]
+                last_slice_w -= self.slice_w
+
+            last_split = (self.dim - 1) * self.slice_w
+            features[i, self.dim-1:self.dim, :, :last_slice_w] = log_mel[:, :, last_split:last_split+last_slice_w]
             section_id = int(os.path.basename(filename)[8:10])  # section_00 -> 0
             sections[i] = section_id
 
@@ -111,6 +115,7 @@ class DcaseDataset(Dataset):
         self.sections = sections
 
         print(f'Input Feature Shape:', self.features.shape[1:])
+
 
     def __len__(self):
         return self.features.shape[0]  # the number of samples
