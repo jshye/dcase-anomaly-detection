@@ -123,11 +123,11 @@ def train(args, DEVICE):
     scheduler = None
 
     train_losses = []  # train loss values for all epochs
-    in_train_losses = []
-    oe_train_losses = []
+    # in_train_losses = []
+    # oe_train_losses = []
     valid_losses = []  # validation loss values for all epochs
-    in_valid_losses = []
-    oe_valid_losses = []
+    # in_valid_losses = []
+    # oe_valid_losses = []
 
     os.makedirs(f'./results/{args.run_name}', exist_ok=True)
     with open(f'./results/{args.run_name}/config.yaml', 'w') as f:

@@ -119,8 +119,9 @@ def test(args, DEVICE):
             y = y.to(DEVICE).long()   # section id
 
             out = model(x)
-            out = out / config['settings']['temp_scaling']
-            score = utils.get_anomaly_score(config, x, y, out, DEVICE)
+            if config['model']['task'] == 'classification':
+                out /= config['settings']['temp_scaling']
+            score = utils.get_anomaly_score(config, x, out)
             source_normal_pred.extend(score.cpu())
             source_true.extend(np.zeros(len(x)))  # normal samples = 0
         
@@ -129,8 +130,9 @@ def test(args, DEVICE):
             y = y.to(DEVICE).long()   # section id
 
             out = model(x)
-            out = out / config['settings']['temp_scaling']
-            score = utils.get_anomaly_score(config, x, y, out, DEVICE)
+            if config['model']['task'] == 'classification':
+                out /= config['settings']['temp_scaling']
+            score = utils.get_anomaly_score(config, x, out)
             source_anomaly_pred.extend(score.cpu())
             source_true.extend(np.ones(len(x)))  # anomaly samples = 1
 
@@ -152,8 +154,9 @@ def test(args, DEVICE):
             y = y.to(DEVICE).long()   # section id
 
             out = model(x)
-            out = out / config['settings']['temp_scaling']
-            score = utils.get_anomaly_score(config, x, y, out, DEVICE)
+            if config['model']['task'] == 'classification':
+                out /= config['settings']['temp_scaling']
+            score = utils.get_anomaly_score(config, x, out)
             target_normal_pred.extend(score.cpu())
             target_true.extend(np.zeros(len(x)))  # normal samples = 0
         
@@ -162,8 +165,9 @@ def test(args, DEVICE):
             y = y.to(DEVICE).long()   # section id
 
             out = model(x)
-            out = out / config['settings']['temp_scaling']
-            score = utils.get_anomaly_score(config, x, y, out, DEVICE)
+            if config['model']['task'] == 'classification':
+                out /= config['settings']['temp_scaling']
+            score = utils.get_anomaly_score(config, x, out)
             target_anomaly_pred.extend(score.cpu())
             target_true.extend(np.ones(len(x)))  # anomaly samples = 1
         
