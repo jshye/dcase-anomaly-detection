@@ -38,20 +38,23 @@ class ROCLogger:
 
 
 class TrainLogger:
-    def __init__(self, title, xlabel, ylabel):
+    def __init__(self, title, xlabel, ylabel, i):
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
-        self.fig = plt.figure(figsize=(7,5))
+        self.fignum = i
+        self.fig = plt.figure(num=self.fignum, figsize=(7,5))
     
     def plot_learning_curve(self, values, label):
+        plt.figure(self.fignum)
         plt.plot(np.arange(len(values)), values, label=label, marker='o', markersize=2)
 
     def save_fig(self, save_path):
+        plt.figure(self.fignum)
         plt.title(self.title)
         plt.legend()
         plt.xlabel(self.xlabel)
         plt.ylabel(self.ylabel)
         plt.grid(alpha=0.2)
         plt.savefig(save_path)
-        plt.close()
+        plt.close(self.fignum)
