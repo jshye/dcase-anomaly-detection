@@ -110,8 +110,10 @@ def train(args, DEVICE):
     with open(f'./results/{args.run_name}/config.yaml', 'w') as f:
         yaml.dump(config, f, default_flow_style=False)
 
-    train_logger = TrainLogger(title=f'[{args.run_name}] {args.machine} - ood: {args.ood}',
-                               xlabel='Epoch', ylabel='Loss')
+    train_logger_g = TrainLogger(title=f'[{args.run_name}] {args.machine} - ood: {args.ood}',
+                                 xlabel='Epoch', ylabel='Loss', i=1)
+    train_logger_d = TrainLogger(title=f'[{args.run_name}] {args.machine} - ood: {args.ood}',
+                                 xlabel='Epoch', ylabel='Loss', i=2)
 
     for epoch in range(1, config['settings']['max_epoch'] + 1):
         train_loss_g = []
@@ -145,9 +147,9 @@ def train(args, DEVICE):
         train_loss_d_epoch = np.mean(train_loss_d)
         train_losses_d.append(train_loss_d_epoch)
         
-        epoch_msg = f'[Epoch {epoch:3d}] Train Loss G: {train_loss_g_epoch:<12.4f}, Train D: {train_loss_d_epoch:<12.4f}'
-        train_logger.plot_learning_curve(train_losses_g, label='Train G')
-        train_logger.plot_learning_curve(train_losses_d, label='Train D')
+        epoch_msg = f'[Epoch {epoch:3d}] Train Loss G: {train_loss_g_epoch:<12.4f} Train D: {train_loss_d_epoch:<12.4f}'
+        train_logger_g.plot_learning_curve(train_losses_g, label='Train G')
+        train_logger_d.plot_learning_curve(train_losses_d, label='Train D')
 
         if args.neptune:
             run[f'training/{args.machine}/train/epoch/loss_g'].log(train_loss_g_epoch)
@@ -176,16 +178,17 @@ def train(args, DEVICE):
             valid_loss_d_epoch = np.mean(valid_loss_d)
             valid_losses_d.append(valid_loss_d_epoch)
             
-            epoch_msg = f'[Epoch {epoch:3d}] Valid Loss G: {valid_loss_g_epoch:<12.4f}, Valid D: {valid_loss_d_epoch:<12.4f}'
-            train_logger.plot_learning_curve(valid_losses_g, label='valid G')
-            train_logger.plot_learning_curve(valid_losses_d, label='valid D')
+            epoch_msg += f'Valid Loss G: {valid_loss_g_epoch:<12.4f} Valid D: {valid_loss_d_epoch:<12.4f}'
+            train_logger_g.plot_learning_curve(valid_losses_g, label='valid G')
+            train_logger_d.plot_learning_curve(valid_losses_d, label='valid D')
 
             if args.neptune:
-                run[f'validing/{args.machine}/valid/epoch/loss_g'].log(valid_loss_g_epoch)
-                run[f'validing/{args.machine}/valid/epoch/loss_d'].log(valid_loss_d_epoch)
+                run[f'training/{args.machine}/valid/epoch/loss_g'].log(valid_loss_g_epoch)
+                run[f'training/{args.machine}/valid/epoch/loss_d'].log(valid_loss_d_epoch)
 
         print(epoch_msg)
-        train_logger.save_fig(f'./results/{args.run_name}/{args.machine}-learning_curve.png')
+        train_logger_g.save_fig(f'./results/{args.run_name}/{args.machine}-learning_curve_g.png')
+        train_logger_d.save_fig(f'./results/{args.run_name}/{args.machine}-learning_curve_d.png')
 
         if args.save_ckpt:
             ckpt_dir = f'./results/{args.run_name}/checkpoints'
