@@ -196,7 +196,7 @@ class Decoder(nn.Module):
                 bias=False,
             ),
         )
-        self.final_layers.add_module(f"final-{num_input_channels}-tanh", nn.Tanh())
+        # self.final_layers.add_module(f"final-{num_input_channels}-tanh", nn.Tanh())
 
     def forward(self, input_tensor):
         """Return generated image."""
@@ -313,7 +313,7 @@ class Ganomaly(nn.Module):
         self.weights_init(self.generator)
         self.weights_init(self.discriminator)
 
-        self.tanh = nn.Tanh()  ## normalize input [-1, 1]  --> different from original source
+        # self.tanh = nn.Tanh()  ## normalize input [-1, 1]  --> different from original source
 
     @staticmethod
     def weights_init(module: nn.Module):
@@ -335,7 +335,7 @@ class Ganomaly(nn.Module):
         Returns:
             Tensor: Regeneration scores.
         """
-        batch = self.tanh(batch)  ## normalize input [-1, 1]  --> different from original source
+        # batch = self.tanh(batch)  ## normalize input [-1, 1]  --> different from original source
 
         # ## normalize input [-1, 1] --> different from original source
         # batch = F.normalize(batch, dim=0)
