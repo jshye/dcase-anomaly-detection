@@ -38,7 +38,7 @@ class ROCLogger:
 
 
 class TrainLogger:
-    def __init__(self, title, xlabel, ylabel, i):
+    def __init__(self, title, xlabel, ylabel, i=1):
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
@@ -58,3 +58,41 @@ class TrainLogger:
         plt.grid(alpha=0.2)
         plt.savefig(save_path)
         plt.close(self.fignum)
+
+
+class GANSampleLogger:
+    def __init__(self, title, num_samples=3):
+        self.title = title
+        self.num_samples = num_samples
+        fig_h = 3 * self.num_samples
+        self.fig = plt.figure(figsize=(20,fig_h))
+
+    def plot_sample(self, src, real, fake, sample_idx):
+        idx = (sample_idx - 1) * 4
+
+        self.fig.add_subplot(self.num_samples, 4, idx+1)
+        plt.imshow(src)
+        plt.colorbar(shrink=0.2)
+        plt.title('source')
+
+        self.fig.add_subplot(self.num_samples, 4, idx+2)
+        plt.imshow(real)
+        plt.colorbar(shrink=0.2)
+        plt.title('Generator Input')
+
+        self.fig.add_subplot(self.num_samples, 4, idx+3)
+        plt.imshow(fake)
+        plt.colorbar(shrink=0.2)
+        plt.title('Reconstruction')
+
+        self.fig.add_subplot(self.num_samples, 4, idx+4)
+        plt.imshow(real-fake, cmap=plt.get_cmap('RdGy'))
+        plt.colorbar(shrink=0.2)
+        plt.title('Error')
+        
+        plt.suptitle(self.title, fontsize='large')
+
+    def save_fig(self, save_path):
+        plt.tight_layout()
+        plt.savefig(save_path)
+        plt.close()
