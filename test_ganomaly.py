@@ -1,10 +1,8 @@
 import os
 from argparse import ArgumentParser
-from importlib.util import spec_from_file_location, module_from_spec
 import random
 import torch
 import numpy as np
-from tqdm import tqdm
 import utils
 import data_utils
 from logger import ROCLogger, GANSampleLogger
@@ -80,10 +78,9 @@ def test(args, DEVICE):
     target_anomaly_dataset = data_utils.DcaseDataset(target_anomaly_files, args.machine, config, dim=input_dim, dim_split=input_dim_split)
     target_anomaly_dataloader, _ = data_utils.get_dataloader(target_anomaly_dataset, batch_size, val=False)
 
-    # ckpt_dir = Path(Path(__file__).resolve().parents[0], config.logging.checkpoints)
+    ## directories to save test results
     ckpt_dir = f'./results/{args.run_name}/checkpoints'
     ckpt_paths = sorted(os.listdir(ckpt_dir))
-
     os.makedirs(f'./results/{args.run_name}/roc_plots/', exist_ok=True)
     os.makedirs(f'./results/{args.run_name}/samples/', exist_ok=True)
 
@@ -100,6 +97,7 @@ def test(args, DEVICE):
         model.load_state_dict(torch.load(os.path.join(ckpt_dir, ckpt)))
         model. eval()
 
+        ## ========================= SOURCE DOMAIN ========================= ##
         source_normal_pred = []
         source_anomaly_pred = []
         source_true = []
@@ -153,6 +151,8 @@ def test(args, DEVICE):
         if args.neptune:
             run[f'test/{args.machine}/source_domain/roc'].log(source_roc_logger.fig)
         source_roc_logger.save_fig(f'./results/{args.run_name}/roc_plots/{args.machine}-epoch{epoch+1}-source.png')
+        
+        ## ========================= TARGET DOMAIN ========================= ##
         target_normal_pred = []
         target_anomaly_pred = []
         target_true = []
