@@ -1,11 +1,9 @@
 import os
-# from pathlib import Path
 from argparse import ArgumentParser
 from importlib.util import spec_from_file_location, module_from_spec
 import random
 import torch
 import numpy as np
-from tqdm import tqdm
 import utils
 import data_utils
 import logger
@@ -60,23 +58,19 @@ def test(args, DEVICE):
     
     batch_size = config['settings']['test_batch_size']
 
-    ## source domain data
-    source_normal_files, source_anomaly_files = data_utils.file_list_generator(
-        config['dataset']['dev_dir'], args.machine, 'test', domain='source',
-    )
-    source_normal_dataset = data_utils.DcaseDataset(source_normal_files, args.machine, config)
-    source_normal_dataloader, _ = data_utils.get_dataloader(source_normal_dataset, batch_size, val=False)
-    source_anomaly_dataset = data_utils.DcaseDataset(source_anomaly_files, args.machine, config)
-    source_anomaly_dataloader, _ = data_utils.get_dataloader(source_anomaly_dataset, batch_size, val=False)
+    domain_data = {'source': {}, 'target': {}}
+    for domain in ['source', 'target']:
+        normal_files, anomaly_files = data_utils.file_list_generator(
+            config['dataset']['dev_dir'], args.machine, 'test', domain=domain,
+        )
+        normal_dataset = data_utils.DcaseDataset(normal_files, args.machine, config)
+        normal_dataloader, _ = data_utils.get_dataloader(normal_dataset, batch_size, val=False)
+        anomaly_dataset = data_utils.DcaseDataset(anomaly_files, args.machine, config)
+        anomaly_dataloader, _ = data_utils.get_dataloader(anomaly_dataset, batch_size, val=False)
 
-    ## target domain data
-    target_normal_files, target_anomaly_files = data_utils.file_list_generator(
-        config['dataset']['dev_dir'], args.machine, 'test', domain='target',
-    )
-    target_normal_dataset = data_utils.DcaseDataset(target_normal_files, args.machine, config)
-    target_normal_dataloader, _ = data_utils.get_dataloader(target_normal_dataset, batch_size, val=False)
-    target_anomaly_dataset = data_utils.DcaseDataset(target_anomaly_files, args.machine, config)
-    target_anomaly_dataloader, _ = data_utils.get_dataloader(target_anomaly_dataset, batch_size, val=False)
+        domain_data[domain]['normal_dataloader'] = normal_dataloader
+        domain_data[domain]['anomaly_dataloader'] = anomaly_dataloader
+
 
     # ckpt_dir = Path(Path(__file__).resolve().parents[0], config.logging.checkpoints)
     ckpt_dir = f'./results/{args.run_name}/checkpoints'
@@ -85,11 +79,11 @@ def test(args, DEVICE):
     os.makedirs(f'./results/{args.run_name}/roc_plots/', exist_ok=True)
 
     print('-' * 80)
-    print(f"{'Epoch':<7}{'S-AUC':<10}{'T-AUC':<10}{'S-Normal':<12}{'S-Anomaly':<12}{'T-Normal':<12}{'T-Anomaly':<12}")
+    print(f"{'Epoch':<7}{'S-AUC':<10}{'S-Normal':<12}{'S-Anomaly':<12}{'T-AUC':<10}{'T-Normal':<12}{'T-Anomaly':<12}")
     print('-' * 80)
 
-    top_source_epoch, top_target_epoch = 0, 0
-    top_source_auc, top_target_auc = 0, 0
+    best_epoch = {'source': 0, 'target': 0}
+    best_auc = {'source': 0, 'target': 0}
 
     for epoch, ckpt in enumerate(ckpt_paths):
         model_dict = {
@@ -110,97 +104,54 @@ def test(args, DEVICE):
         model.load_state_dict(torch.load(os.path.join(ckpt_dir, ckpt)))
         model. eval()
 
-        source_normal_pred = []
-        source_anomaly_pred = []
-        source_true = []
+        epoch_msg = f'{epoch+1:<7}'
+        for domain in ['source', 'target']:
+            pred_dict = {'normal': [], 'anomaly': []}
+            true = []
+            
+            for key in ['normal', 'anomaly']:
+                dataloader = domain_data[domain][f'{key}_dataloader']
+                for x, y in dataloader:
+                    x = x.to(DEVICE).float()  # log mel spectrogram
+                    y = y.to(DEVICE).long()   # section id
 
-        for x, y in tqdm(source_normal_dataloader, leave=False, total=100):
-            x = x.to(DEVICE).float()  # log mel spectrogram
-            y = y.to(DEVICE).long()   # section id
+                    out = model(x)
+                    if config['model']['task'] == 'classification':
+                        out /= config['settings']['temp_scaling']
+                    score = utils.get_anomaly_score(config, x, out)
+                    pred_dict[key].extend(score.cpu())
 
-            out = model(x)
-            if config['model']['task'] == 'classification':
-                out /= config['settings']['temp_scaling']
-            score = utils.get_anomaly_score(config, x, out)
-            source_normal_pred.extend(score.cpu())
-            source_true.extend(np.zeros(len(x)))  # normal samples = 0
+                    if key == 'normal':            
+                        true.extend(np.zeros(len(x)))
+                    elif key == 'anomaly':            
+                        true.extend(np.ones(len(x)))
+
+            pred = [*pred_dict['normal'], *pred_dict['anomaly']]
+            auc = roc_auc_score(true, pred)
+            fpr, tpr, _ = roc_curve(true, pred)
+
+            roc_logger = logger.ROCLogger(f'Epoch {epoch+1}, {domain.capitalize()} Domain, AUC: {auc:.4f}')
+            roc_logger.plot_roc(fpr, tpr, pred_dict['normal'], pred_dict['anomaly'])
+            if args.neptune:
+                run[f'test/{args.machine}/{domain}_domain/roc'].log(roc_logger.fig)
+            roc_logger.save_fig(f'./results/{args.run_name}/roc_plots/{args.machine}-epoch{epoch+1}-{domain}.png')
+            
+            if best_auc[domain] <= auc:
+                best_epoch[domain] = epoch + 1
+                best_auc[domain] = auc
+
+            if args.neptune:
+                run[f'test/{args.machine}/{domain}_domain/AUC'].log(auc)
+                run[f'test/{args.machine}/{domain}_domain/Normal_score'].log(np.mean(pred_dict['normal']))
+                run[f'test/{args.machine}/{domain}_domain/Anomaly_score'].log(np.mean(pred_dict['anomaly']))
         
-        for x, y in tqdm(source_anomaly_dataloader, leave=False, total=100):
-            x = x.to(DEVICE).float()  # log mel spectrogram
-            y = y.to(DEVICE).long()   # section id
+            epoch_msg += f"{auc:<10.4f}{np.mean(pred_dict['normal']):<12.4f}{np.mean(pred_dict['anomaly']):<12.4f}"
 
-            out = model(x)
-            if config['model']['task'] == 'classification':
-                out /= config['settings']['temp_scaling']
-            score = utils.get_anomaly_score(config, x, out)
-            source_anomaly_pred.extend(score.cpu())
-            source_true.extend(np.ones(len(x)))  # anomaly samples = 1
-
-        source_pred = [*source_normal_pred, *source_anomaly_pred]
-        source_auc = roc_auc_score(source_true, source_pred)
-        source_fpr, source_tpr, _ = roc_curve(source_true, source_pred)
-
-        source_roc_logger = logger.ROCLogger(f'Epoch {epoch+1}, Source Domain, AUC: {source_auc:.4f}')
-        source_roc_logger.plot_roc(source_fpr, source_tpr, source_normal_pred, source_anomaly_pred)
-        if args.neptune:
-            run[f'test/{args.machine}/source_domain/roc'].log(source_roc_logger.fig)
-        source_roc_logger.save_fig(f'./results/{args.run_name}/roc_plots/{args.machine}-epoch{epoch+1}-source.png')
-        target_normal_pred = []
-        target_anomaly_pred = []
-        target_true = []
-
-        for x, y in tqdm(target_normal_dataloader, leave=False, total=100):
-            x = x.to(DEVICE).float()  # log mel spectrogram
-            y = y.to(DEVICE).long()   # section id
-
-            out = model(x)
-            if config['model']['task'] == 'classification':
-                out /= config['settings']['temp_scaling']
-            score = utils.get_anomaly_score(config, x, out)
-            target_normal_pred.extend(score.cpu())
-            target_true.extend(np.zeros(len(x)))  # normal samples = 0
-        
-        for x, y in tqdm(target_anomaly_dataloader, leave=False, total=100):
-            x = x.to(DEVICE).float()  # log mel spectrogram
-            y = y.to(DEVICE).long()   # section id
-
-            out = model(x)
-            if config['model']['task'] == 'classification':
-                out /= config['settings']['temp_scaling']
-            score = utils.get_anomaly_score(config, x, out)
-            target_anomaly_pred.extend(score.cpu())
-            target_true.extend(np.ones(len(x)))  # anomaly samples = 1
-        
-        target_pred = [*target_normal_pred, *target_anomaly_pred]
-        target_auc = roc_auc_score(target_true, target_pred)
-        target_fpr, target_tpr, _ = roc_curve(target_true, target_pred)
-        target_roc_logger = logger.ROCLogger(f'Epoch {epoch+1}, Target Domain, AUC: {target_auc:.4f}')
-        target_roc_logger.plot_roc(target_fpr, target_tpr, target_normal_pred, target_anomaly_pred)
-        if args.neptune:
-            run[f'test/{args.machine}/target_domain/roc'].log(target_roc_logger.fig)
-        target_roc_logger.save_fig(f'./results/{args.run_name}/roc_plots/{args.machine}-epoch{epoch+1}-target.png')
-        
-        print(f"{epoch+1:<7}{source_auc:<10.4f}{target_auc:<10.4f}{np.mean(source_normal_pred):<12.4f}"+
-        f"{np.mean(source_anomaly_pred):<12.4f}{np.mean(target_normal_pred):<12.4f}{np.mean(target_anomaly_pred):<12.4f}")
-
-        if args.neptune:
-            run[f'test/{args.machine}/source_domain/AUC'].log(source_auc)
-            run[f'test/{args.machine}/source_domain/Normal_score'].log(np.mean(source_normal_pred))
-            run[f'test/{args.machine}/source_domain/Anomaly_score'].log(np.mean(source_anomaly_pred))
-            run[f'test/{args.machine}/target_domain/AUC'].log(target_auc)
-            run[f'test/{args.machine}/target_domain/Normal_score'].log(np.mean(target_normal_pred))
-            run[f'test/{args.machine}/target_domain/Anomaly_score'].log(np.mean(target_anomaly_pred))
-
-        if top_source_auc <= source_auc:
-            top_source_epoch = epoch + 1
-            top_source_auc = source_auc
-        if top_target_auc <= target_auc:
-            top_target_epoch = epoch + 1
-            top_target_auc = target_auc
+        print(epoch_msg)
 
     print('-' * 80)
-    print(f'Best: [Source] Epoch {top_source_epoch} - {top_source_auc:.4f}'+
-          f'  [Target] Epoch {top_target_epoch} - {top_target_auc:.4f}')
+    print(f"Best: [Source] Epoch {best_epoch['source']} - {best_auc['source']:.4f}"+
+          f"  [Target] Epoch {best_epoch['target']} - {best_auc['target']:.4f}")
     print('-' * 80)
 
 
