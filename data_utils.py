@@ -79,11 +79,15 @@ def file_to_logmel(filename, machine, config):
 
 
 def normalize_time(x):
+    """Normalize log mel spectrogram through time axis"""
     d, h, w = x.shape
-    x_mean = np.tile(np.mean(x, axis=(0,2)), (w, d)).T
-    x_var = np.tile(np.std(x, axis=(0,2)), (w, d)).T
+    x_mean = np.tile(np.mean(x, axis=(0,2)), (w, 1)).T
+    x_mean = np.repeat(x_mean[np.newaxis, :], d, axis=0)
+    x_var = np.tile(np.std(x, axis=(0,2)), (w, 1)).T
+    x_var = np.repeat(x_var[np.newaxis, :], d, axis=0)
     x_norm = (x - x_mean) / x_var
     return x_norm
+
 
 class DcaseDataset(Dataset):
     def __init__(self, files, machine, config, dim=1, dim_split=None, transform=None):
@@ -131,7 +135,7 @@ class DcaseDataset(Dataset):
         log_mel = self.features[idx, :]
         if self.config['machine_config'][self.machine]['normalize'] == 'time':
             log_mel = normalize_time(log_mel)
-            
+
         if self.transform:
             log_mel = self.transform(log_mel)
         section_id = self.sections[idx]
