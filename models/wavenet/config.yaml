@@ -1,0 +1,95 @@
+model:
+  name: wavenet
+  n_class: 3
+  task: reconstruction
+  criterion: mse_loss 
+  n_channel: 128
+  n_mul: 4
+  kernel_size: 3
+
+dataset:
+  dev_dir: D:/dcase/dev_data
+  eval_dir: D:/dcase/eval_data
+
+settings:
+  seed: 42
+  train_batch_size: 32
+  test_batch_size: 32
+  label_smoothing: 0.0
+  temp_scaling: 1.0
+  oe_loss_coef: 0.5
+  oe_div_power: 0   # if 0, oe_batch_size == train_batch_size
+  lr: 1e-3
+  weight_decay: 0.0
+  max_epoch: 64
+
+machine_config:
+  ToyCar:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+    normalize: time
+
+  slider:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+    normalize: null
+
+  ToyTrain:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+    normalize: null
+
+  fan:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+    normalize: null
+
+  gearbox:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+    normalize: null
+
+  pump:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+    normalize: null
+
+  valve:
+    sample_rate: 16000
+    n_sec: 10
+    n_fft: 2048
+    hop_length: 512
+    n_mels: 128     
+    power: 2.0
+    input_shape: [128, 313]
+    normalize: null

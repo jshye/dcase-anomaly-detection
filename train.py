@@ -111,6 +111,7 @@ def train(args, DEVICE):
     model_dict = {
         'resnet': 'ResNet',
         'liu2022': 'Liu2022',
+        'wavenet': 'WaveNet',
         # 'ganomaly': 'Ganomaly',
     }
 
