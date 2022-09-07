@@ -28,9 +28,7 @@ def get_args():
     parser.add_argument('--machine', '-m', type=str, default='ToyCar',
                         #  nargs='*',
                          help="Machine Type <ToyCar, ToyTrain, fan, gearbox, pump, slider, valve>.")    
-    parser.add_argument('--ood', type=str, default=None,
-                        #  nargs='*',
-                         help="Out-of-Distribution Machine Type")
+    parser.add_argument('--ood', type=str, default=None, nargs='*', help="Out-of-Distribution Machine Type")
     parser.add_argument('--run_val', action='store_true', help="Run validation")
     # parser.add_argument('--logger', type=str, default='neptune', help='Logger Type <neptune, csv>.')
     parser.add_argument('--neptune', action='store_true', help='Log results in Neptune')
@@ -84,10 +82,19 @@ def train(args, DEVICE):
     dataloader, val_dataloader = data_utils.get_dataloader(dataset, batch_size, val=args.run_val, shuffle=True)
 
     if args.ood:  # outlier exposure
+        assert args.machine not in args.ood
+
+        outlier_files = []
         oe_batch_size = max(1, batch_size // (2 ** config['settings']['oe_div_power']))
-        outlier_files, _ = data_utils.file_list_generator(
-            config['dataset']['dev_dir'], args.ood, 'train'
-        )
+
+        for ood_machine in args.ood:
+            ood_machine_files, _ = data_utils.file_list_generator(
+                config['dataset']['dev_dir'], ood_machine, 'train'
+            )
+            outlier_files.extend(ood_machine_files)
+
+        random.shuffle(outlier_files)
+
         if args.run_val:
             outlier_files = outlier_files[:oe_batch_size*(len(dataloader)+len(val_dataloader))]
         else:
@@ -101,7 +108,6 @@ def train(args, DEVICE):
         outlier_dataloader = []
         outlier_val_dataloader = []
 
-    # model = utils.get_model(args.model, config)
     model_dict = {
         'resnet': 'ResNet',
         'liu2022': 'Liu2022',
