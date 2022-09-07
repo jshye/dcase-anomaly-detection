@@ -29,6 +29,7 @@ machine_config:
     n_mels: 128     
     power: 2.0
     input_shape: [128, 313]
+    normalize: time
 
   slider:
     sample_rate: 16000
@@ -38,6 +39,7 @@ machine_config:
     n_mels: 128     
     power: 2.0
     input_shape: [128, 313]
+    normalize: null
 
   ToyTrain:
     sample_rate: 16000
@@ -47,6 +49,7 @@ machine_config:
     n_mels: 128     
     power: 2.0
     input_shape: [128, 313]
+    normalize: null
 
   fan:
     sample_rate: 16000
@@ -56,6 +59,7 @@ machine_config:
     n_mels: 128     
     power: 2.0
     input_shape: [128, 313]
+    normalize: null
 
   gearbox:
     sample_rate: 16000
@@ -65,6 +69,7 @@ machine_config:
     n_mels: 128     
     power: 2.0
     input_shape: [128, 313]
+    normalize: null
 
   pump:
     sample_rate: 16000
@@ -74,6 +79,7 @@ machine_config:
     n_mels: 128     
     power: 2.0
     input_shape: [128, 313]
+    normalize: null
 
   valve:
     sample_rate: 16000
@@ -83,3 +89,4 @@ machine_config:
     n_mels: 128     
     power: 2.0
     input_shape: [128, 313]
+    normalize: null
