@@ -78,6 +78,13 @@ def file_to_logmel(filename, machine, config):
     return log_mel.cpu()
 
 
+def normalize_time(x):
+    d, h, w = x.shape
+    x_mean = np.tile(np.mean(x, axis=(0,2)), (w, d)).T
+    x_var = np.tile(np.std(x, axis=(0,2)), (w, d)).T
+    x_norm = (x - x_mean) / x_var
+    return x_norm
+
 class DcaseDataset(Dataset):
     def __init__(self, files, machine, config, dim=1, dim_split=None, transform=None):
         self.machine = machine
@@ -122,6 +129,9 @@ class DcaseDataset(Dataset):
 
     def __getitem__(self, idx):
         log_mel = self.features[idx, :]
+        if self.config['machine_config'][self.machine]['normalize'] == 'time':
+            log_mel = normalize_time(log_mel)
+            
         if self.transform:
             log_mel = self.transform(log_mel)
         section_id = self.sections[idx]
