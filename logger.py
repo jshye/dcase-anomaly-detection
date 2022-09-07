@@ -70,23 +70,28 @@ class GANSampleLogger:
     def plot_sample(self, src, real, fake, sample_idx):
         idx = (sample_idx - 1) * 4
 
+        vmin = min(real.min(), fake.min())
+        vmax = max(real.max(), fake.max())
+
         self.fig.add_subplot(self.num_samples, 4, idx+1)
         plt.imshow(src)
         plt.colorbar(shrink=0.4)
         plt.title('source')
 
         self.fig.add_subplot(self.num_samples, 4, idx+2)
-        plt.imshow(real)
+        plt.imshow(real, vmin=vmin, vmax=vmax)
         plt.colorbar(shrink=0.4)
         plt.title('Generator Input')
 
         self.fig.add_subplot(self.num_samples, 4, idx+3)
-        plt.imshow(fake)
+        plt.imshow(fake, vmin=vmin, vmax=vmax)
         plt.colorbar(shrink=0.4)
         plt.title('Reconstruction')
 
+        error = real - fake
+        error_vmax = max(abs(error.min()), error.max())
         self.fig.add_subplot(self.num_samples, 4, idx+4)
-        plt.imshow(real-fake, cmap=plt.get_cmap('RdGy'))
+        plt.imshow(error, cmap=plt.get_cmap('RdGy'), vmin=-error_vmax, vmax=error_vmax)
         plt.colorbar(shrink=0.4)
         plt.title('Error')
 
